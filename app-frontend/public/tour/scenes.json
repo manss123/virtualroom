@@ -1,0 +1,28 @@
+{
+  "scenes": [
+    {
+      "id": "room1",
+      "title": "ห้อง 1",
+      "image": "/panos/room.jpg",
+      "initialView": { "yaw": 0, "pitch": 0, "fov": 1.1 },
+      "hotspots": [
+        { "type": "link", "yaw": -1.2, "pitch": 0.05, "to": "room2", "label": "ไปห้อง 2" },
+        { "type": "info", "yaw": 0.5, "pitch": -0.1, "html": "<b>เกียร์</b> คือ..." },
+        { "type": "youtube", "yaw": 0.2, "pitch": 0.0, "videoId": "dQw4w9WgXcQ" },
+        { "type": "quiz", "yaw": -0.3, "pitch": 0.12, "questionId": "q1" }
+      ]
+    },
+    {
+      "id": "room2",
+      "title": "ห้อง 2",
+      "image": "/panos/room-2.jpg",
+      "initialView": { "yaw": 0, "pitch": 0, "fov": 1.1 },
+      "hotspots": [
+        { "type": "link", "yaw": -1.2, "pitch": 0.05, "to": "room2", "label": "ไปห้อง 2" },
+        { "type": "info", "yaw": 0.5, "pitch": -0.1, "html": "<b>เกียร์</b> คือ..." },
+        { "type": "youtube", "yaw": 0.2, "pitch": 0.0, "videoId": "dQw4w9WgXcQ" },
+        { "type": "quiz", "yaw": -0.3, "pitch": 0.12, "questionId": "q1" }
+      ]
+    }
+  ]
+}
