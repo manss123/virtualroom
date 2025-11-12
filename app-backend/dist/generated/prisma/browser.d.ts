@@ -1,0 +1,10 @@
+import * as Prisma from './internal/prismaNamespaceBrowser';
+export { Prisma };
+export * as $Enums from './enums';
+export * from './enums';
+export type User = Prisma.UserModel;
+export type AuthIdentity = Prisma.AuthIdentityModel;
+export type PrePostTest = Prisma.PrePostTestModel;
+export type SelfRegAssessment = Prisma.SelfRegAssessmentModel;
+export type RoomPlan = Prisma.RoomPlanModel;
+export type RoomStudyLog = Prisma.RoomStudyLogModel;

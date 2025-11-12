@@ -11,7 +11,7 @@ async function bootstrap() {
 
   app.enableCors({
     origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-    credential: true,
+    credentials: true,
   })
 
   app.useGlobalPipes(new ValidationPipe({whitelist: true, transform: true}))
@@ -29,7 +29,7 @@ async function bootstrap() {
 
     const document = SwaggerModule.createDocument(app, config)
     SwaggerModule.setup('docs', app, document, {
-      swaggerOptions: { persistAuthorization: true },
+      swaggerOptions: { persistAuthorization: true, withCredentials: true },
     })
 
   await app.listen(process.env.PORT ? Number(process.env.PORT) : 4000);

@@ -5,6 +5,7 @@ import { LoginDto, RegisterDto } from './dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RefreshAuthGuard } from './refresh.guard'
 import { PrismaService } from '../prisma/prisma.service';
+import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 const isProd = process.env.NODE_ENV === 'production'
 const cookieOpts = {
@@ -14,6 +15,7 @@ const cookieOpts = {
     path: '/',
 }
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
     constructor(private auth: AuthService, private prisma: PrismaService) {}
@@ -27,6 +29,14 @@ export class AuthController {
     }
 
     @Post('login')
+    @ApiBody({ schema: {
+        properties: {
+            email: { type: 'string', example: 'student@example.com' },
+            password: { type: 'string', example: 'password123' },
+        },
+        required: ['email','password']
+    }})
+    @ApiOkResponse({ description: 'Set HttpOnly cookies: access_token & refresh_token' })
     async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
         const { user, accessToken, refreshToken } = await this.auth.login(dto);
         res.cookie('access_token', accessToken, {...cookieOpts, maxAge: 15 * 60 * 1000})

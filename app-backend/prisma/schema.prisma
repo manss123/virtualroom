@@ -1,41 +1,49 @@
-datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-    id           String              @id @default(cuid())
-    firstName    String
-    lastName     String
-    sex          String? // "M" | "F" | etc.
-    age          Int?
-    school       String?
-    grade        String? // ระดับชั้น เช่น ม.3
-    email        String?             @unique
-    identities   AuthIdentity[]
-    prePostTests PrePostTest[]
-    selfRegs     SelfRegAssessment[]
-    roomPlans    RoomPlan[]
-    studyLogs    RoomStudyLog[]
-    createdAt    DateTime            @default(now())
-    updatedAt    DateTime            @updatedAt
+  id               String              @id @default(cuid())
+  email            String?             @unique
+  firstName        String
+  lastName         String
+  sex              String?
+  age              Int?
+  school           String?
+  grade            String?
+  identities       AuthIdentity[]
+  refreshTokenHash String?           
+  prePostTests     PrePostTest[]
+  selfRegs         SelfRegAssessment[]
+  roomPlans        RoomPlan[]
+  studyLogs        RoomStudyLog[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
 }
 
 model AuthIdentity {
-    id             String  @id @default(cuid())
-    userId         String
-    provider       String // "local" | "google"
-    providerUserId String? // sub จาก Google
-    email          String? // สำหรับ local / google
-    passwordHash   String? // เฉพาะ local
-    user           User    @relation(fields: [userId], references: [id])
+  id               String  @id @default(cuid())
+  userId           String
+  provider         String 
+  providerUserId   String?
+  email            String?
+  passwordHash     String? 
+  user             User    @relation(fields: [userId], references: [id])
 
-    @@unique([provider, providerUserId])
-    @@unique([provider, email])
+  @@unique([provider, providerUserId])
+  @@unique([provider, email])
 }
 
 enum PrePostType {
@@ -84,3 +92,4 @@ model RoomStudyLog {
 
     @@index([userId, roomKey, startAt])
 }
+
