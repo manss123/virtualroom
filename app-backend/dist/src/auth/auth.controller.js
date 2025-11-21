@@ -65,6 +65,19 @@ let AuthController = class AuthController {
 exports.AuthController = AuthController;
 __decorate([
     (0, common_1.Post)('register'),
+    (0, swagger_1.ApiBody)({ schema: {
+            properties: {
+                email: { type: 'string', example: 'student@example.com' },
+                password: { type: 'string', example: 'password123' },
+                firstname: { type: 'string', example: 'John' },
+                lastName: { type: 'string', example: 'Dohn' },
+                sex: { type: 'string', example: 'Male' },
+                age: { type: 'number', example: 15 },
+                school: { type: 'string', example: 'โรงเรียน' },
+                grade: { type: 'string', example: 'มัธยมศึกษาปีที่ 3' },
+            },
+            required: ['email', 'password']
+        } }),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
@@ -112,7 +125,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "refresh", null);
 exports.AuthController = AuthController = __decorate([
-    (0, swagger_1.ApiTags)('auth'),
+    (0, swagger_1.ApiTags)('Auth'),
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService, prisma_service_1.PrismaService])
 ], AuthController);

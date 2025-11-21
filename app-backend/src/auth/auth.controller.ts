@@ -15,12 +15,25 @@ const cookieOpts = {
     path: '/',
 }
 
-@ApiTags('auth')
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
     constructor(private auth: AuthService, private prisma: PrismaService) {}
 
     @Post('register')
+    @ApiBody({ schema: {
+        properties: {
+            email: { type: 'string', example: 'student@example.com' },
+            password: { type: 'string', example: 'password123' },
+            firstname: { type: 'string', example: 'John'},
+            lastName: { type: 'string', example: 'Dohn'},
+            sex: { type: 'string', example: 'Male'},
+            age: { type: 'number', example: 15},
+            school: { type: 'string', example: 'โรงเรียน'},
+            grade: { type: 'string', example: 'มัธยมศึกษาปีที่ 3'},
+        },
+        required: ['email','password']
+    }})
     async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
         const { user, accessToken, refreshToken } = await this.auth.register(dto);
         res.cookie('access_token', accessToken, {...cookieOpts, maxAge: 15 * 60 * 1000 })
