@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
-const bcrypt_1 = require("bcrypt");
+const bcrypt = require("bcrypt");
 const jwt_1 = require("@nestjs/jwt");
 const ACCESS_TTL_SEC = 15 * 60;
 const REFRESH_TTL_SEC = 7 * 24 * 60 * 60;
@@ -26,7 +26,7 @@ let AuthService = class AuthService {
         const exists = await this.prisma.user.findUnique({ where: { email } });
         if (exists)
             throw new common_1.BadRequestException("Email already in use");
-        const passwordHash = await bcrypt_1.default.hash(dto.password, 12);
+        const passwordHash = await bcrypt.hash(dto.password, 12);
         const user = await this.prisma.user.create({
             data: {
                 firstName: dto.firstName,
@@ -46,7 +46,7 @@ let AuthService = class AuthService {
             },
         });
         const { accessToken, refreshToken } = this.signTokens(user.id);
-        const refreshHash = await bcrypt_1.default.hash(refreshToken, 12);
+        const refreshHash = await bcrypt.hash(refreshToken, 12);
         await this.prisma.user.update({
             where: { id: user.id },
             data: { refreshTokenHash: refreshHash },
@@ -61,11 +61,11 @@ let AuthService = class AuthService {
         });
         if (!identity?.passwordHash)
             throw new common_1.UnauthorizedException("Invalid credentials");
-        const ok = await bcrypt_1.default.compare(dto.password, identity.passwordHash);
+        const ok = await bcrypt.compare(dto.password, identity.passwordHash);
         if (!ok)
             throw new common_1.UnauthorizedException("Invalid credentials");
         const { accessToken, refreshToken } = this.signTokens(identity.userId);
-        const refreshHash = await bcrypt_1.default.hash(refreshToken, 12);
+        const refreshHash = await bcrypt.hash(refreshToken, 12);
         await this.prisma.user.update({
             where: { id: identity.userId },
             data: { refreshTokenHash: refreshHash },
@@ -81,11 +81,11 @@ let AuthService = class AuthService {
         const user = await this.prisma.user.findUnique({ where: { id: userId } });
         if (!user?.refreshTokenHash)
             throw new common_1.UnauthorizedException("No refresh token on record");
-        const valid = await bcrypt_1.default.compare(incomingRefresh, user.refreshTokenHash);
+        const valid = await bcrypt.compare(incomingRefresh, user.refreshTokenHash);
         if (!valid)
             throw new common_1.UnauthorizedException("Invalid refresh token");
         const { accessToken, refreshToken } = this.signTokens(userId);
-        const refreshHash = await bcrypt_1.default.hash(refreshToken, 12);
+        const refreshHash = await bcrypt.hash(refreshToken, 12);
         await this.prisma.user.update({
             where: { id: userId },
             data: { refreshTokenHash: refreshHash },
