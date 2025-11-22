@@ -17,17 +17,19 @@ export declare class AuthController {
     }>;
     me(req: Request): Promise<{
         user: {
-            id: string;
-            email: string | null;
             firstName: string;
             lastName: string;
             sex: string | null;
             age: number | null;
             school: string | null;
             grade: string | null;
+            email: string | null;
+            id: string;
             refreshTokenHash: string | null;
             createdAt: Date;
             updatedAt: Date;
+            pdpaAccepted: boolean;
+            pdpaAcceptedAt: Date | null;
         } | null;
     }>;
     refresh(req: Request, res: Response): Promise<{

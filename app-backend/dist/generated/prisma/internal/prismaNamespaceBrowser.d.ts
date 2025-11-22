@@ -32,6 +32,7 @@ export declare const ModelName: {
     readonly SelfRegAssessment: "SelfRegAssessment";
     readonly RoomPlan: "RoomPlan";
     readonly RoomStudyLog: "RoomStudyLog";
+    readonly QuestionnaireStatus: "QuestionnaireStatus";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export declare const TransactionIsolationLevel: {
@@ -53,6 +54,8 @@ export declare const UserScalarFieldEnum: {
     readonly refreshTokenHash: "refreshTokenHash";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
+    readonly pdpaAccepted: "pdpaAccepted";
+    readonly pdpaAcceptedAt: "pdpaAcceptedAt";
 };
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum];
 export declare const AuthIdentityScalarFieldEnum: {
@@ -98,6 +101,15 @@ export declare const RoomStudyLogScalarFieldEnum: {
     readonly durationSec: "durationSec";
 };
 export type RoomStudyLogScalarFieldEnum = (typeof RoomStudyLogScalarFieldEnum)[keyof typeof RoomStudyLogScalarFieldEnum];
+export declare const QuestionnaireStatusScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly type: "type";
+    readonly status: "status";
+    readonly completedAt: "completedAt";
+    readonly updatedAt: "updatedAt";
+};
+export type QuestionnaireStatusScalarFieldEnum = (typeof QuestionnaireStatusScalarFieldEnum)[keyof typeof QuestionnaireStatusScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: "asc";
     readonly desc: "desc";

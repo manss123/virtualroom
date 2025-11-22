@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import {
-  QuestionnaireStatusState,
-  QuestionnaireType,
-} from '../../generated/prisma/client'
-import { PrismaService } from '../prisma/prisma.service'
+import { QuestionnaireStatusState, QuestionnaireType } from 'generated/prisma/enums'
+import { PrismaService } from 'src/prisma/prisma.service'
 
 @Injectable()
 export class QuestionnairesService {

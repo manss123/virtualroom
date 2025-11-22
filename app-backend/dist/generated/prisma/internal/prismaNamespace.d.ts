@@ -182,6 +182,7 @@ export declare const ModelName: {
     readonly SelfRegAssessment: "SelfRegAssessment";
     readonly RoomPlan: "RoomPlan";
     readonly RoomStudyLog: "RoomStudyLog";
+    readonly QuestionnaireStatus: "QuestionnaireStatus";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export interface TypeMapCb<GlobalOmitOptions = {}> extends runtime.Types.Utils.Fn<{
@@ -194,7 +195,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "user" | "authIdentity" | "prePostTest" | "selfRegAssessment" | "roomPlan" | "roomStudyLog";
+        modelProps: "user" | "authIdentity" | "prePostTest" | "selfRegAssessment" | "roomPlan" | "roomStudyLog" | "questionnaireStatus";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -642,6 +643,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 };
             };
         };
+        QuestionnaireStatus: {
+            payload: Prisma.$QuestionnaireStatusPayload<ExtArgs>;
+            fields: Prisma.QuestionnaireStatusFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.QuestionnaireStatusFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionnaireStatusPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.QuestionnaireStatusFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionnaireStatusPayload>;
+                };
+                findFirst: {
+                    args: Prisma.QuestionnaireStatusFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionnaireStatusPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.QuestionnaireStatusFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionnaireStatusPayload>;
+                };
+                findMany: {
+                    args: Prisma.QuestionnaireStatusFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionnaireStatusPayload>[];
+                };
+                create: {
+                    args: Prisma.QuestionnaireStatusCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionnaireStatusPayload>;
+                };
+                createMany: {
+                    args: Prisma.QuestionnaireStatusCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.QuestionnaireStatusCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionnaireStatusPayload>[];
+                };
+                delete: {
+                    args: Prisma.QuestionnaireStatusDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionnaireStatusPayload>;
+                };
+                update: {
+                    args: Prisma.QuestionnaireStatusUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionnaireStatusPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.QuestionnaireStatusDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.QuestionnaireStatusUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.QuestionnaireStatusUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionnaireStatusPayload>[];
+                };
+                upsert: {
+                    args: Prisma.QuestionnaireStatusUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$QuestionnaireStatusPayload>;
+                };
+                aggregate: {
+                    args: Prisma.QuestionnaireStatusAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregateQuestionnaireStatus>;
+                };
+                groupBy: {
+                    args: Prisma.QuestionnaireStatusGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.QuestionnaireStatusGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.QuestionnaireStatusCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.QuestionnaireStatusCountAggregateOutputType> | number;
+                };
+            };
+        };
     };
 } & {
     other: {
@@ -685,6 +760,8 @@ export declare const UserScalarFieldEnum: {
     readonly refreshTokenHash: "refreshTokenHash";
     readonly createdAt: "createdAt";
     readonly updatedAt: "updatedAt";
+    readonly pdpaAccepted: "pdpaAccepted";
+    readonly pdpaAcceptedAt: "pdpaAcceptedAt";
 };
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum];
 export declare const AuthIdentityScalarFieldEnum: {
@@ -730,6 +807,15 @@ export declare const RoomStudyLogScalarFieldEnum: {
     readonly durationSec: "durationSec";
 };
 export type RoomStudyLogScalarFieldEnum = (typeof RoomStudyLogScalarFieldEnum)[keyof typeof RoomStudyLogScalarFieldEnum];
+export declare const QuestionnaireStatusScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly type: "type";
+    readonly status: "status";
+    readonly completedAt: "completedAt";
+    readonly updatedAt: "updatedAt";
+};
+export type QuestionnaireStatusScalarFieldEnum = (typeof QuestionnaireStatusScalarFieldEnum)[keyof typeof QuestionnaireStatusScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: "asc";
     readonly desc: "desc";
@@ -751,8 +837,13 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>;
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>;
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>;
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>;
 export type EnumPrePostTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PrePostType'>;
 export type ListEnumPrePostTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PrePostType[]'>;
+export type EnumQuestionnaireTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestionnaireType'>;
+export type ListEnumQuestionnaireTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestionnaireType[]'>;
+export type EnumQuestionnaireStatusStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestionnaireStatusState'>;
+export type ListEnumQuestionnaireStatusStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuestionnaireStatusState[]'>;
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>;
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>;
 export type BatchPayload = {
@@ -787,6 +878,7 @@ export type GlobalOmitConfig = {
     selfRegAssessment?: Prisma.SelfRegAssessmentOmit;
     roomPlan?: Prisma.RoomPlanOmit;
     roomStudyLog?: Prisma.RoomStudyLogOmit;
+    questionnaireStatus?: Prisma.QuestionnaireStatusOmit;
 };
 export type LogLevel = 'info' | 'query' | 'warn' | 'error';
 export type LogDefinition = {

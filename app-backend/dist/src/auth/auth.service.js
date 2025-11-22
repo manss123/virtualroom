@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const bcrypt = require("bcrypt");
 const jwt_1 = require("@nestjs/jwt");
+const enums_1 = require("../../generated/prisma/enums");
 const ACCESS_TTL_SEC = 15 * 60;
 const REFRESH_TTL_SEC = 7 * 24 * 60 * 60;
 let AuthService = class AuthService {
@@ -44,6 +45,16 @@ let AuthService = class AuthService {
                     },
                 },
             },
+        });
+        await this.prisma.questionnaireStatus.createMany({
+            data: [
+                enums_1.QuestionnaireType.PDPA_CONSENT,
+                enums_1.QuestionnaireType.PRE_TEST,
+                enums_1.QuestionnaireType.PRE_SURVEY,
+                enums_1.QuestionnaireType.POST_TEST,
+                enums_1.QuestionnaireType.POST_SURVEY,
+            ].map((type) => ({ userId: user.id, type })),
+            skipDuplicates: true,
         });
         const { accessToken, refreshToken } = this.signTokens(user.id);
         const refreshHash = await bcrypt.hash(refreshToken, 12);

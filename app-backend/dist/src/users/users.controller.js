@@ -15,24 +15,50 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
 const users_service_1 = require("./users.service");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const prisma_service_1 = require("../prisma/prisma.service");
 let UsersController = class UsersController {
-    constructor(users) {
+    constructor(users, prisma) {
         this.users = users;
+        this.prisma = prisma;
     }
     find(id) {
         return this.users.getById(id);
     }
+    async acceptPdpa(req) {
+        const userId = req.user.userId;
+        const user = await this.prisma.user.update({
+            where: { id: userId },
+            data: { pdpaAccepted: true, pdpaAcceptedAt: new Date() },
+            select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                pdpaAccepted: true,
+                pdpaAcceptedAt: true,
+            },
+        });
+        return { user };
+    }
 };
 exports.UsersController = UsersController;
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    (0, common_1.Get)(":id"),
+    __param(0, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], UsersController.prototype, "find", null);
+__decorate([
+    (0, common_1.Post)("accept-pdpa"),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "acceptPdpa", null);
 exports.UsersController = UsersController = __decorate([
-    (0, common_1.Controller)('users'),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Controller)("users"),
+    __metadata("design:paramtypes", [users_service_1.UsersService, prisma_service_1.PrismaService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

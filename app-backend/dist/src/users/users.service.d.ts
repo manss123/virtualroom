@@ -14,6 +14,8 @@ export declare class UsersService {
         refreshTokenHash: string | null;
         createdAt: Date;
         updatedAt: Date;
+        pdpaAccepted: boolean;
+        pdpaAcceptedAt: Date | null;
     } | null, null, import("@prisma/client/runtime/library").DefaultArgs, {
         omit: import("../../generated/prisma/internal/prismaNamespace").GlobalOmitConfig | undefined;
     }>;

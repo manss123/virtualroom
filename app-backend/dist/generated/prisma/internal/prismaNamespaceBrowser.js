@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.RoomStudyLogScalarFieldEnum = exports.RoomPlanScalarFieldEnum = exports.SelfRegAssessmentScalarFieldEnum = exports.PrePostTestScalarFieldEnum = exports.AuthIdentityScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.NullsOrder = exports.QueryMode = exports.SortOrder = exports.QuestionnaireStatusScalarFieldEnum = exports.RoomStudyLogScalarFieldEnum = exports.RoomPlanScalarFieldEnum = exports.SelfRegAssessmentScalarFieldEnum = exports.PrePostTestScalarFieldEnum = exports.AuthIdentityScalarFieldEnum = exports.UserScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = require("@prisma/client/runtime/index-browser");
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -17,7 +17,8 @@ exports.ModelName = {
     PrePostTest: 'PrePostTest',
     SelfRegAssessment: 'SelfRegAssessment',
     RoomPlan: 'RoomPlan',
-    RoomStudyLog: 'RoomStudyLog'
+    RoomStudyLog: 'RoomStudyLog',
+    QuestionnaireStatus: 'QuestionnaireStatus'
 };
 exports.TransactionIsolationLevel = runtime.makeStrictEnum({
     ReadUncommitted: 'ReadUncommitted',
@@ -36,7 +37,9 @@ exports.UserScalarFieldEnum = {
     grade: 'grade',
     refreshTokenHash: 'refreshTokenHash',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    pdpaAccepted: 'pdpaAccepted',
+    pdpaAcceptedAt: 'pdpaAcceptedAt'
 };
 exports.AuthIdentityScalarFieldEnum = {
     id: 'id',
@@ -75,6 +78,14 @@ exports.RoomStudyLogScalarFieldEnum = {
     startAt: 'startAt',
     endAt: 'endAt',
     durationSec: 'durationSec'
+};
+exports.QuestionnaireStatusScalarFieldEnum = {
+    id: 'id',
+    userId: 'userId',
+    type: 'type',
+    status: 'status',
+    completedAt: 'completedAt',
+    updatedAt: 'updatedAt'
 };
 exports.SortOrder = {
     asc: 'asc',

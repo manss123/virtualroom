@@ -7,9 +7,11 @@ import { computed } from 'vue';
 import Login from '~/components/Home/Login.vue';
 import Register from '~/components/Home/Register.vue';
 
+definePageMeta({ middleware: ['guest'] })
+
 const pages = {
   Login,
-  Register
+  Register,
 }
 
 const { currentPage } = provideAuthView('Login')

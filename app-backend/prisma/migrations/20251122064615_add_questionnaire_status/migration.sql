@@ -1,6 +1,12 @@
 -- CreateEnum
 CREATE TYPE "PrePostType" AS ENUM ('PRE', 'POST');
 
+-- CreateEnum
+CREATE TYPE "QuestionnaireType" AS ENUM ('PDPA_CONSENT', 'PRE_TEST', 'PRE_SURVEY', 'POST_TEST', 'POST_SURVEY');
+
+-- CreateEnum
+CREATE TYPE "QuestionnaireStatusState" AS ENUM ('NOT_STARTED', 'IN_PROGRESS', 'COMPLETED');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -76,6 +82,18 @@ CREATE TABLE "RoomStudyLog" (
     CONSTRAINT "RoomStudyLog_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "QuestionnaireStatus" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "type" "QuestionnaireType" NOT NULL,
+    "status" "QuestionnaireStatusState" NOT NULL DEFAULT 'NOT_STARTED',
+    "completedAt" TIMESTAMP(3),
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "QuestionnaireStatus_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
@@ -91,6 +109,9 @@ CREATE INDEX "RoomPlan_userId_roomKey_idx" ON "RoomPlan"("userId", "roomKey");
 -- CreateIndex
 CREATE INDEX "RoomStudyLog_userId_roomKey_startAt_idx" ON "RoomStudyLog"("userId", "roomKey", "startAt");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "QuestionnaireStatus_userId_type_key" ON "QuestionnaireStatus"("userId", "type");
+
 -- AddForeignKey
 ALTER TABLE "AuthIdentity" ADD CONSTRAINT "AuthIdentity_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -105,3 +126,6 @@ ALTER TABLE "RoomPlan" ADD CONSTRAINT "RoomPlan_userId_fkey" FOREIGN KEY ("userI
 
 -- AddForeignKey
 ALTER TABLE "RoomStudyLog" ADD CONSTRAINT "RoomStudyLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "QuestionnaireStatus" ADD CONSTRAINT "QuestionnaireStatus_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -100,19 +100,6 @@
           </div>
         </div>
 
-        <div class="flex w-full gap-14">
-          <div class="flex flex-col">
-            <div class="text-white h-[36px]">อีเมล*</div>
-            <input v-model="form.email" class="w-[350px] h-[80px] px-5 bg-[#EFF7F7] rounded-[15px]" type="email"
-              required />
-          </div>
-          <div class="flex flex-col">
-            <div class="text-white h-[36px]">รหัสผ่าน* (อย่างน้อย 6 ตัวอักษร)</div>
-            <input v-model="form.password" minlength="6" class="w-[350px] h-[80px] px-5 bg-[#EFF7F7] rounded-[15px]"
-              type="password" required />
-          </div>
-        </div>
-
         <div class="flex w-full text-white">
           *ข้อมูลที่นักเรียนจำเป็นต้องกรอก
         </div>
@@ -121,7 +108,7 @@
           xxx@gmail.com
         </div>
 
-        <div class="flex flex-col gap-4 items-center justify-center w-full">
+        <div class="flex flex-col gap-4 items-center justify-center  w-full">
           <button
             class="flex w-fit h-[70px] px-10 bg-[#FFC233] text-black hover:bg-[#B97530] hover:text-white cursor-pointer drop-shadow-xl font-medium rounded-[15px] items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
             type="submit" :disabled="submitting">
@@ -134,6 +121,7 @@
           </button>
         </div>
       </form>
+
     </div>
   </div>
 </template>

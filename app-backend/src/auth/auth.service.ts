@@ -7,7 +7,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { RegisterDto, LoginDto } from "./dto";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
-import { QuestionnaireType } from "../../generated/prisma/client";
+import { QuestionnaireType } from "generated/prisma/enums";
 
 const ACCESS_TTL_SEC = 15 * 60;
 const REFRESH_TTL_SEC = 7 * 24 * 60 * 60;

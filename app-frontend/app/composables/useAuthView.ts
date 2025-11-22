@@ -1,6 +1,6 @@
 import { inject, provide, type InjectionKey, type Ref } from "vue";
 
-type ViewName = "Login" | "Register";
+type ViewName = "Login" | "Register" | "PDPA";
 type AuthViewCtx = {
   currentPage: Ref<ViewName>;
   setPage: (p: ViewName) => void;

@@ -32,6 +32,8 @@ model User {
   questionnaireStatuses QuestionnaireStatus[]
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
+  pdpaAccepted     Boolean  @default(false)
+  pdpaAcceptedAt   DateTime?
 }
 
 model AuthIdentity {

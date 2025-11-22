@@ -26,6 +26,8 @@ export type UserMinAggregateOutputType = {
     refreshTokenHash: string | null;
     createdAt: Date | null;
     updatedAt: Date | null;
+    pdpaAccepted: boolean | null;
+    pdpaAcceptedAt: Date | null;
 };
 export type UserMaxAggregateOutputType = {
     id: string | null;
@@ -39,6 +41,8 @@ export type UserMaxAggregateOutputType = {
     refreshTokenHash: string | null;
     createdAt: Date | null;
     updatedAt: Date | null;
+    pdpaAccepted: boolean | null;
+    pdpaAcceptedAt: Date | null;
 };
 export type UserCountAggregateOutputType = {
     id: number;
@@ -52,6 +56,8 @@ export type UserCountAggregateOutputType = {
     refreshTokenHash: number;
     createdAt: number;
     updatedAt: number;
+    pdpaAccepted: number;
+    pdpaAcceptedAt: number;
     _all: number;
 };
 export type UserAvgAggregateInputType = {
@@ -72,6 +78,8 @@ export type UserMinAggregateInputType = {
     refreshTokenHash?: true;
     createdAt?: true;
     updatedAt?: true;
+    pdpaAccepted?: true;
+    pdpaAcceptedAt?: true;
 };
 export type UserMaxAggregateInputType = {
     id?: true;
@@ -85,6 +93,8 @@ export type UserMaxAggregateInputType = {
     refreshTokenHash?: true;
     createdAt?: true;
     updatedAt?: true;
+    pdpaAccepted?: true;
+    pdpaAcceptedAt?: true;
 };
 export type UserCountAggregateInputType = {
     id?: true;
@@ -98,6 +108,8 @@ export type UserCountAggregateInputType = {
     refreshTokenHash?: true;
     createdAt?: true;
     updatedAt?: true;
+    pdpaAccepted?: true;
+    pdpaAcceptedAt?: true;
     _all?: true;
 };
 export type UserAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -140,6 +152,8 @@ export type UserGroupByOutputType = {
     refreshTokenHash: string | null;
     createdAt: Date;
     updatedAt: Date;
+    pdpaAccepted: boolean;
+    pdpaAcceptedAt: Date | null;
     _count: UserCountAggregateOutputType | null;
     _avg: UserAvgAggregateOutputType | null;
     _sum: UserSumAggregateOutputType | null;
@@ -164,11 +178,14 @@ export type UserWhereInput = {
     refreshTokenHash?: Prisma.StringNullableFilter<"User"> | string | null;
     createdAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string;
+    pdpaAccepted?: Prisma.BoolFilter<"User"> | boolean;
+    pdpaAcceptedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null;
     identities?: Prisma.AuthIdentityListRelationFilter;
     prePostTests?: Prisma.PrePostTestListRelationFilter;
     selfRegs?: Prisma.SelfRegAssessmentListRelationFilter;
     roomPlans?: Prisma.RoomPlanListRelationFilter;
     studyLogs?: Prisma.RoomStudyLogListRelationFilter;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusListRelationFilter;
 };
 export type UserOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
@@ -182,11 +199,14 @@ export type UserOrderByWithRelationInput = {
     refreshTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
+    pdpaAccepted?: Prisma.SortOrder;
+    pdpaAcceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder;
     identities?: Prisma.AuthIdentityOrderByRelationAggregateInput;
     prePostTests?: Prisma.PrePostTestOrderByRelationAggregateInput;
     selfRegs?: Prisma.SelfRegAssessmentOrderByRelationAggregateInput;
     roomPlans?: Prisma.RoomPlanOrderByRelationAggregateInput;
     studyLogs?: Prisma.RoomStudyLogOrderByRelationAggregateInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusOrderByRelationAggregateInput;
 };
 export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
@@ -203,11 +223,14 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
     refreshTokenHash?: Prisma.StringNullableFilter<"User"> | string | null;
     createdAt?: Prisma.DateTimeFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string;
+    pdpaAccepted?: Prisma.BoolFilter<"User"> | boolean;
+    pdpaAcceptedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null;
     identities?: Prisma.AuthIdentityListRelationFilter;
     prePostTests?: Prisma.PrePostTestListRelationFilter;
     selfRegs?: Prisma.SelfRegAssessmentListRelationFilter;
     roomPlans?: Prisma.RoomPlanListRelationFilter;
     studyLogs?: Prisma.RoomStudyLogListRelationFilter;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusListRelationFilter;
 }, "id" | "email">;
 export type UserOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
@@ -221,6 +244,8 @@ export type UserOrderByWithAggregationInput = {
     refreshTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
+    pdpaAccepted?: Prisma.SortOrder;
+    pdpaAcceptedAt?: Prisma.SortOrderInput | Prisma.SortOrder;
     _count?: Prisma.UserCountOrderByAggregateInput;
     _avg?: Prisma.UserAvgOrderByAggregateInput;
     _max?: Prisma.UserMaxOrderByAggregateInput;
@@ -242,6 +267,8 @@ export type UserScalarWhereWithAggregatesInput = {
     refreshTokenHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null;
     createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string;
     updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string;
+    pdpaAccepted?: Prisma.BoolWithAggregatesFilter<"User"> | boolean;
+    pdpaAcceptedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null;
 };
 export type UserCreateInput = {
     id?: string;
@@ -255,11 +282,14 @@ export type UserCreateInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     identities?: Prisma.AuthIdentityCreateNestedManyWithoutUserInput;
     prePostTests?: Prisma.PrePostTestCreateNestedManyWithoutUserInput;
     selfRegs?: Prisma.SelfRegAssessmentCreateNestedManyWithoutUserInput;
     roomPlans?: Prisma.RoomPlanCreateNestedManyWithoutUserInput;
     studyLogs?: Prisma.RoomStudyLogCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusCreateNestedManyWithoutUserInput;
 };
 export type UserUncheckedCreateInput = {
     id?: string;
@@ -273,11 +303,14 @@ export type UserUncheckedCreateInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     identities?: Prisma.AuthIdentityUncheckedCreateNestedManyWithoutUserInput;
     prePostTests?: Prisma.PrePostTestUncheckedCreateNestedManyWithoutUserInput;
     selfRegs?: Prisma.SelfRegAssessmentUncheckedCreateNestedManyWithoutUserInput;
     roomPlans?: Prisma.RoomPlanUncheckedCreateNestedManyWithoutUserInput;
     studyLogs?: Prisma.RoomStudyLogUncheckedCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedCreateNestedManyWithoutUserInput;
 };
 export type UserUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -291,11 +324,14 @@ export type UserUpdateInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     identities?: Prisma.AuthIdentityUpdateManyWithoutUserNestedInput;
     prePostTests?: Prisma.PrePostTestUpdateManyWithoutUserNestedInput;
     selfRegs?: Prisma.SelfRegAssessmentUpdateManyWithoutUserNestedInput;
     roomPlans?: Prisma.RoomPlanUpdateManyWithoutUserNestedInput;
     studyLogs?: Prisma.RoomStudyLogUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUpdateManyWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -309,11 +345,14 @@ export type UserUncheckedUpdateInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     identities?: Prisma.AuthIdentityUncheckedUpdateManyWithoutUserNestedInput;
     prePostTests?: Prisma.PrePostTestUncheckedUpdateManyWithoutUserNestedInput;
     selfRegs?: Prisma.SelfRegAssessmentUncheckedUpdateManyWithoutUserNestedInput;
     roomPlans?: Prisma.RoomPlanUncheckedUpdateManyWithoutUserNestedInput;
     studyLogs?: Prisma.RoomStudyLogUncheckedUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedUpdateManyWithoutUserNestedInput;
 };
 export type UserCreateManyInput = {
     id?: string;
@@ -327,6 +366,8 @@ export type UserCreateManyInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
 };
 export type UserUpdateManyMutationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -340,6 +381,8 @@ export type UserUpdateManyMutationInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 };
 export type UserUncheckedUpdateManyInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -353,6 +396,8 @@ export type UserUncheckedUpdateManyInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 };
 export type UserCountOrderByAggregateInput = {
     id?: Prisma.SortOrder;
@@ -366,6 +411,8 @@ export type UserCountOrderByAggregateInput = {
     refreshTokenHash?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
+    pdpaAccepted?: Prisma.SortOrder;
+    pdpaAcceptedAt?: Prisma.SortOrder;
 };
 export type UserAvgOrderByAggregateInput = {
     age?: Prisma.SortOrder;
@@ -382,6 +429,8 @@ export type UserMaxOrderByAggregateInput = {
     refreshTokenHash?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
+    pdpaAccepted?: Prisma.SortOrder;
+    pdpaAcceptedAt?: Prisma.SortOrder;
 };
 export type UserMinOrderByAggregateInput = {
     id?: Prisma.SortOrder;
@@ -395,6 +444,8 @@ export type UserMinOrderByAggregateInput = {
     refreshTokenHash?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
+    pdpaAccepted?: Prisma.SortOrder;
+    pdpaAcceptedAt?: Prisma.SortOrder;
 };
 export type UserSumOrderByAggregateInput = {
     age?: Prisma.SortOrder;
@@ -418,6 +469,12 @@ export type NullableIntFieldUpdateOperationsInput = {
 };
 export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string;
+};
+export type BoolFieldUpdateOperationsInput = {
+    set?: boolean;
+};
+export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null;
 };
 export type UserCreateNestedOneWithoutIdentitiesInput = {
     create?: Prisma.XOR<Prisma.UserCreateWithoutIdentitiesInput, Prisma.UserUncheckedCreateWithoutIdentitiesInput>;
@@ -479,6 +536,18 @@ export type UserUpdateOneRequiredWithoutStudyLogsNestedInput = {
     connect?: Prisma.UserWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStudyLogsInput, Prisma.UserUpdateWithoutStudyLogsInput>, Prisma.UserUncheckedUpdateWithoutStudyLogsInput>;
 };
+export type UserCreateNestedOneWithoutQuestionnaireStatusesInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutQuestionnaireStatusesInput, Prisma.UserUncheckedCreateWithoutQuestionnaireStatusesInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutQuestionnaireStatusesInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
+export type UserUpdateOneRequiredWithoutQuestionnaireStatusesNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutQuestionnaireStatusesInput, Prisma.UserUncheckedCreateWithoutQuestionnaireStatusesInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutQuestionnaireStatusesInput;
+    upsert?: Prisma.UserUpsertWithoutQuestionnaireStatusesInput;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutQuestionnaireStatusesInput, Prisma.UserUpdateWithoutQuestionnaireStatusesInput>, Prisma.UserUncheckedUpdateWithoutQuestionnaireStatusesInput>;
+};
 export type UserCreateWithoutIdentitiesInput = {
     id?: string;
     email?: string | null;
@@ -491,10 +560,13 @@ export type UserCreateWithoutIdentitiesInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     prePostTests?: Prisma.PrePostTestCreateNestedManyWithoutUserInput;
     selfRegs?: Prisma.SelfRegAssessmentCreateNestedManyWithoutUserInput;
     roomPlans?: Prisma.RoomPlanCreateNestedManyWithoutUserInput;
     studyLogs?: Prisma.RoomStudyLogCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusCreateNestedManyWithoutUserInput;
 };
 export type UserUncheckedCreateWithoutIdentitiesInput = {
     id?: string;
@@ -508,10 +580,13 @@ export type UserUncheckedCreateWithoutIdentitiesInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     prePostTests?: Prisma.PrePostTestUncheckedCreateNestedManyWithoutUserInput;
     selfRegs?: Prisma.SelfRegAssessmentUncheckedCreateNestedManyWithoutUserInput;
     roomPlans?: Prisma.RoomPlanUncheckedCreateNestedManyWithoutUserInput;
     studyLogs?: Prisma.RoomStudyLogUncheckedCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedCreateNestedManyWithoutUserInput;
 };
 export type UserCreateOrConnectWithoutIdentitiesInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -538,10 +613,13 @@ export type UserUpdateWithoutIdentitiesInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     prePostTests?: Prisma.PrePostTestUpdateManyWithoutUserNestedInput;
     selfRegs?: Prisma.SelfRegAssessmentUpdateManyWithoutUserNestedInput;
     roomPlans?: Prisma.RoomPlanUpdateManyWithoutUserNestedInput;
     studyLogs?: Prisma.RoomStudyLogUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUpdateManyWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateWithoutIdentitiesInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -555,10 +633,13 @@ export type UserUncheckedUpdateWithoutIdentitiesInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     prePostTests?: Prisma.PrePostTestUncheckedUpdateManyWithoutUserNestedInput;
     selfRegs?: Prisma.SelfRegAssessmentUncheckedUpdateManyWithoutUserNestedInput;
     roomPlans?: Prisma.RoomPlanUncheckedUpdateManyWithoutUserNestedInput;
     studyLogs?: Prisma.RoomStudyLogUncheckedUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedUpdateManyWithoutUserNestedInput;
 };
 export type UserCreateWithoutPrePostTestsInput = {
     id?: string;
@@ -572,10 +653,13 @@ export type UserCreateWithoutPrePostTestsInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     identities?: Prisma.AuthIdentityCreateNestedManyWithoutUserInput;
     selfRegs?: Prisma.SelfRegAssessmentCreateNestedManyWithoutUserInput;
     roomPlans?: Prisma.RoomPlanCreateNestedManyWithoutUserInput;
     studyLogs?: Prisma.RoomStudyLogCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusCreateNestedManyWithoutUserInput;
 };
 export type UserUncheckedCreateWithoutPrePostTestsInput = {
     id?: string;
@@ -589,10 +673,13 @@ export type UserUncheckedCreateWithoutPrePostTestsInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     identities?: Prisma.AuthIdentityUncheckedCreateNestedManyWithoutUserInput;
     selfRegs?: Prisma.SelfRegAssessmentUncheckedCreateNestedManyWithoutUserInput;
     roomPlans?: Prisma.RoomPlanUncheckedCreateNestedManyWithoutUserInput;
     studyLogs?: Prisma.RoomStudyLogUncheckedCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedCreateNestedManyWithoutUserInput;
 };
 export type UserCreateOrConnectWithoutPrePostTestsInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -619,10 +706,13 @@ export type UserUpdateWithoutPrePostTestsInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     identities?: Prisma.AuthIdentityUpdateManyWithoutUserNestedInput;
     selfRegs?: Prisma.SelfRegAssessmentUpdateManyWithoutUserNestedInput;
     roomPlans?: Prisma.RoomPlanUpdateManyWithoutUserNestedInput;
     studyLogs?: Prisma.RoomStudyLogUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUpdateManyWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateWithoutPrePostTestsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -636,10 +726,13 @@ export type UserUncheckedUpdateWithoutPrePostTestsInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     identities?: Prisma.AuthIdentityUncheckedUpdateManyWithoutUserNestedInput;
     selfRegs?: Prisma.SelfRegAssessmentUncheckedUpdateManyWithoutUserNestedInput;
     roomPlans?: Prisma.RoomPlanUncheckedUpdateManyWithoutUserNestedInput;
     studyLogs?: Prisma.RoomStudyLogUncheckedUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedUpdateManyWithoutUserNestedInput;
 };
 export type UserCreateWithoutSelfRegsInput = {
     id?: string;
@@ -653,10 +746,13 @@ export type UserCreateWithoutSelfRegsInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     identities?: Prisma.AuthIdentityCreateNestedManyWithoutUserInput;
     prePostTests?: Prisma.PrePostTestCreateNestedManyWithoutUserInput;
     roomPlans?: Prisma.RoomPlanCreateNestedManyWithoutUserInput;
     studyLogs?: Prisma.RoomStudyLogCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusCreateNestedManyWithoutUserInput;
 };
 export type UserUncheckedCreateWithoutSelfRegsInput = {
     id?: string;
@@ -670,10 +766,13 @@ export type UserUncheckedCreateWithoutSelfRegsInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     identities?: Prisma.AuthIdentityUncheckedCreateNestedManyWithoutUserInput;
     prePostTests?: Prisma.PrePostTestUncheckedCreateNestedManyWithoutUserInput;
     roomPlans?: Prisma.RoomPlanUncheckedCreateNestedManyWithoutUserInput;
     studyLogs?: Prisma.RoomStudyLogUncheckedCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedCreateNestedManyWithoutUserInput;
 };
 export type UserCreateOrConnectWithoutSelfRegsInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -700,10 +799,13 @@ export type UserUpdateWithoutSelfRegsInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     identities?: Prisma.AuthIdentityUpdateManyWithoutUserNestedInput;
     prePostTests?: Prisma.PrePostTestUpdateManyWithoutUserNestedInput;
     roomPlans?: Prisma.RoomPlanUpdateManyWithoutUserNestedInput;
     studyLogs?: Prisma.RoomStudyLogUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUpdateManyWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateWithoutSelfRegsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -717,10 +819,13 @@ export type UserUncheckedUpdateWithoutSelfRegsInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     identities?: Prisma.AuthIdentityUncheckedUpdateManyWithoutUserNestedInput;
     prePostTests?: Prisma.PrePostTestUncheckedUpdateManyWithoutUserNestedInput;
     roomPlans?: Prisma.RoomPlanUncheckedUpdateManyWithoutUserNestedInput;
     studyLogs?: Prisma.RoomStudyLogUncheckedUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedUpdateManyWithoutUserNestedInput;
 };
 export type UserCreateWithoutRoomPlansInput = {
     id?: string;
@@ -734,10 +839,13 @@ export type UserCreateWithoutRoomPlansInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     identities?: Prisma.AuthIdentityCreateNestedManyWithoutUserInput;
     prePostTests?: Prisma.PrePostTestCreateNestedManyWithoutUserInput;
     selfRegs?: Prisma.SelfRegAssessmentCreateNestedManyWithoutUserInput;
     studyLogs?: Prisma.RoomStudyLogCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusCreateNestedManyWithoutUserInput;
 };
 export type UserUncheckedCreateWithoutRoomPlansInput = {
     id?: string;
@@ -751,10 +859,13 @@ export type UserUncheckedCreateWithoutRoomPlansInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     identities?: Prisma.AuthIdentityUncheckedCreateNestedManyWithoutUserInput;
     prePostTests?: Prisma.PrePostTestUncheckedCreateNestedManyWithoutUserInput;
     selfRegs?: Prisma.SelfRegAssessmentUncheckedCreateNestedManyWithoutUserInput;
     studyLogs?: Prisma.RoomStudyLogUncheckedCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedCreateNestedManyWithoutUserInput;
 };
 export type UserCreateOrConnectWithoutRoomPlansInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -781,10 +892,13 @@ export type UserUpdateWithoutRoomPlansInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     identities?: Prisma.AuthIdentityUpdateManyWithoutUserNestedInput;
     prePostTests?: Prisma.PrePostTestUpdateManyWithoutUserNestedInput;
     selfRegs?: Prisma.SelfRegAssessmentUpdateManyWithoutUserNestedInput;
     studyLogs?: Prisma.RoomStudyLogUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUpdateManyWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateWithoutRoomPlansInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -798,10 +912,13 @@ export type UserUncheckedUpdateWithoutRoomPlansInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     identities?: Prisma.AuthIdentityUncheckedUpdateManyWithoutUserNestedInput;
     prePostTests?: Prisma.PrePostTestUncheckedUpdateManyWithoutUserNestedInput;
     selfRegs?: Prisma.SelfRegAssessmentUncheckedUpdateManyWithoutUserNestedInput;
     studyLogs?: Prisma.RoomStudyLogUncheckedUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedUpdateManyWithoutUserNestedInput;
 };
 export type UserCreateWithoutStudyLogsInput = {
     id?: string;
@@ -815,10 +932,13 @@ export type UserCreateWithoutStudyLogsInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     identities?: Prisma.AuthIdentityCreateNestedManyWithoutUserInput;
     prePostTests?: Prisma.PrePostTestCreateNestedManyWithoutUserInput;
     selfRegs?: Prisma.SelfRegAssessmentCreateNestedManyWithoutUserInput;
     roomPlans?: Prisma.RoomPlanCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusCreateNestedManyWithoutUserInput;
 };
 export type UserUncheckedCreateWithoutStudyLogsInput = {
     id?: string;
@@ -832,10 +952,13 @@ export type UserUncheckedCreateWithoutStudyLogsInput = {
     refreshTokenHash?: string | null;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
     identities?: Prisma.AuthIdentityUncheckedCreateNestedManyWithoutUserInput;
     prePostTests?: Prisma.PrePostTestUncheckedCreateNestedManyWithoutUserInput;
     selfRegs?: Prisma.SelfRegAssessmentUncheckedCreateNestedManyWithoutUserInput;
     roomPlans?: Prisma.RoomPlanUncheckedCreateNestedManyWithoutUserInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedCreateNestedManyWithoutUserInput;
 };
 export type UserCreateOrConnectWithoutStudyLogsInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -862,10 +985,13 @@ export type UserUpdateWithoutStudyLogsInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     identities?: Prisma.AuthIdentityUpdateManyWithoutUserNestedInput;
     prePostTests?: Prisma.PrePostTestUpdateManyWithoutUserNestedInput;
     selfRegs?: Prisma.SelfRegAssessmentUpdateManyWithoutUserNestedInput;
     roomPlans?: Prisma.RoomPlanUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUpdateManyWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateWithoutStudyLogsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -879,10 +1005,106 @@ export type UserUncheckedUpdateWithoutStudyLogsInput = {
     refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
     identities?: Prisma.AuthIdentityUncheckedUpdateManyWithoutUserNestedInput;
     prePostTests?: Prisma.PrePostTestUncheckedUpdateManyWithoutUserNestedInput;
     selfRegs?: Prisma.SelfRegAssessmentUncheckedUpdateManyWithoutUserNestedInput;
     roomPlans?: Prisma.RoomPlanUncheckedUpdateManyWithoutUserNestedInput;
+    questionnaireStatuses?: Prisma.QuestionnaireStatusUncheckedUpdateManyWithoutUserNestedInput;
+};
+export type UserCreateWithoutQuestionnaireStatusesInput = {
+    id?: string;
+    email?: string | null;
+    firstName: string;
+    lastName: string;
+    sex?: string | null;
+    age?: number | null;
+    school?: string | null;
+    grade?: string | null;
+    refreshTokenHash?: string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
+    identities?: Prisma.AuthIdentityCreateNestedManyWithoutUserInput;
+    prePostTests?: Prisma.PrePostTestCreateNestedManyWithoutUserInput;
+    selfRegs?: Prisma.SelfRegAssessmentCreateNestedManyWithoutUserInput;
+    roomPlans?: Prisma.RoomPlanCreateNestedManyWithoutUserInput;
+    studyLogs?: Prisma.RoomStudyLogCreateNestedManyWithoutUserInput;
+};
+export type UserUncheckedCreateWithoutQuestionnaireStatusesInput = {
+    id?: string;
+    email?: string | null;
+    firstName: string;
+    lastName: string;
+    sex?: string | null;
+    age?: number | null;
+    school?: string | null;
+    grade?: string | null;
+    refreshTokenHash?: string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: Date | string | null;
+    identities?: Prisma.AuthIdentityUncheckedCreateNestedManyWithoutUserInput;
+    prePostTests?: Prisma.PrePostTestUncheckedCreateNestedManyWithoutUserInput;
+    selfRegs?: Prisma.SelfRegAssessmentUncheckedCreateNestedManyWithoutUserInput;
+    roomPlans?: Prisma.RoomPlanUncheckedCreateNestedManyWithoutUserInput;
+    studyLogs?: Prisma.RoomStudyLogUncheckedCreateNestedManyWithoutUserInput;
+};
+export type UserCreateOrConnectWithoutQuestionnaireStatusesInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutQuestionnaireStatusesInput, Prisma.UserUncheckedCreateWithoutQuestionnaireStatusesInput>;
+};
+export type UserUpsertWithoutQuestionnaireStatusesInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutQuestionnaireStatusesInput, Prisma.UserUncheckedUpdateWithoutQuestionnaireStatusesInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutQuestionnaireStatusesInput, Prisma.UserUncheckedCreateWithoutQuestionnaireStatusesInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutQuestionnaireStatusesInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutQuestionnaireStatusesInput, Prisma.UserUncheckedUpdateWithoutQuestionnaireStatusesInput>;
+};
+export type UserUpdateWithoutQuestionnaireStatusesInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    firstName?: Prisma.StringFieldUpdateOperationsInput | string;
+    lastName?: Prisma.StringFieldUpdateOperationsInput | string;
+    sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+    school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    identities?: Prisma.AuthIdentityUpdateManyWithoutUserNestedInput;
+    prePostTests?: Prisma.PrePostTestUpdateManyWithoutUserNestedInput;
+    selfRegs?: Prisma.SelfRegAssessmentUpdateManyWithoutUserNestedInput;
+    roomPlans?: Prisma.RoomPlanUpdateManyWithoutUserNestedInput;
+    studyLogs?: Prisma.RoomStudyLogUpdateManyWithoutUserNestedInput;
+};
+export type UserUncheckedUpdateWithoutQuestionnaireStatusesInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    firstName?: Prisma.StringFieldUpdateOperationsInput | string;
+    lastName?: Prisma.StringFieldUpdateOperationsInput | string;
+    sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    age?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
+    school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    refreshTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    pdpaAccepted?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    pdpaAcceptedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    identities?: Prisma.AuthIdentityUncheckedUpdateManyWithoutUserNestedInput;
+    prePostTests?: Prisma.PrePostTestUncheckedUpdateManyWithoutUserNestedInput;
+    selfRegs?: Prisma.SelfRegAssessmentUncheckedUpdateManyWithoutUserNestedInput;
+    roomPlans?: Prisma.RoomPlanUncheckedUpdateManyWithoutUserNestedInput;
+    studyLogs?: Prisma.RoomStudyLogUncheckedUpdateManyWithoutUserNestedInput;
 };
 export type UserCountOutputType = {
     identities: number;
@@ -890,6 +1112,7 @@ export type UserCountOutputType = {
     selfRegs: number;
     roomPlans: number;
     studyLogs: number;
+    questionnaireStatuses: number;
 };
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     identities?: boolean | UserCountOutputTypeCountIdentitiesArgs;
@@ -897,6 +1120,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
     selfRegs?: boolean | UserCountOutputTypeCountSelfRegsArgs;
     roomPlans?: boolean | UserCountOutputTypeCountRoomPlansArgs;
     studyLogs?: boolean | UserCountOutputTypeCountStudyLogsArgs;
+    questionnaireStatuses?: boolean | UserCountOutputTypeCountQuestionnaireStatusesArgs;
 };
 export type UserCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     select?: Prisma.UserCountOutputTypeSelect<ExtArgs> | null;
@@ -916,6 +1140,9 @@ export type UserCountOutputTypeCountRoomPlansArgs<ExtArgs extends runtime.Types.
 export type UserCountOutputTypeCountStudyLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     where?: Prisma.RoomStudyLogWhereInput;
 };
+export type UserCountOutputTypeCountQuestionnaireStatusesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.QuestionnaireStatusWhereInput;
+};
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     email?: boolean;
@@ -928,11 +1155,14 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
     refreshTokenHash?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: boolean;
     identities?: boolean | Prisma.User$identitiesArgs<ExtArgs>;
     prePostTests?: boolean | Prisma.User$prePostTestsArgs<ExtArgs>;
     selfRegs?: boolean | Prisma.User$selfRegsArgs<ExtArgs>;
     roomPlans?: boolean | Prisma.User$roomPlansArgs<ExtArgs>;
     studyLogs?: boolean | Prisma.User$studyLogsArgs<ExtArgs>;
+    questionnaireStatuses?: boolean | Prisma.User$questionnaireStatusesArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["user"]>;
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -947,6 +1177,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
     refreshTokenHash?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: boolean;
 }, ExtArgs["result"]["user"]>;
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
@@ -960,6 +1192,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
     refreshTokenHash?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: boolean;
 }, ExtArgs["result"]["user"]>;
 export type UserSelectScalar = {
     id?: boolean;
@@ -973,14 +1207,17 @@ export type UserSelectScalar = {
     refreshTokenHash?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    pdpaAccepted?: boolean;
+    pdpaAcceptedAt?: boolean;
 };
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "firstName" | "lastName" | "sex" | "age" | "school" | "grade" | "refreshTokenHash" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>;
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "firstName" | "lastName" | "sex" | "age" | "school" | "grade" | "refreshTokenHash" | "createdAt" | "updatedAt" | "pdpaAccepted" | "pdpaAcceptedAt", ExtArgs["result"]["user"]>;
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     identities?: boolean | Prisma.User$identitiesArgs<ExtArgs>;
     prePostTests?: boolean | Prisma.User$prePostTestsArgs<ExtArgs>;
     selfRegs?: boolean | Prisma.User$selfRegsArgs<ExtArgs>;
     roomPlans?: boolean | Prisma.User$roomPlansArgs<ExtArgs>;
     studyLogs?: boolean | Prisma.User$studyLogsArgs<ExtArgs>;
+    questionnaireStatuses?: boolean | Prisma.User$questionnaireStatusesArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {};
@@ -993,6 +1230,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
         selfRegs: Prisma.$SelfRegAssessmentPayload<ExtArgs>[];
         roomPlans: Prisma.$RoomPlanPayload<ExtArgs>[];
         studyLogs: Prisma.$RoomStudyLogPayload<ExtArgs>[];
+        questionnaireStatuses: Prisma.$QuestionnaireStatusPayload<ExtArgs>[];
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
@@ -1006,6 +1244,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
         refreshTokenHash: string | null;
         createdAt: Date;
         updatedAt: Date;
+        pdpaAccepted: boolean;
+        pdpaAcceptedAt: Date | null;
     }, ExtArgs["result"]["user"]>;
     composites: {};
 };
@@ -1063,6 +1303,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
     selfRegs<T extends Prisma.User$selfRegsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$selfRegsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SelfRegAssessmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     roomPlans<T extends Prisma.User$roomPlansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$roomPlansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RoomPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     studyLogs<T extends Prisma.User$studyLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$studyLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RoomStudyLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    questionnaireStatuses<T extends Prisma.User$questionnaireStatusesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$questionnaireStatusesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuestionnaireStatusPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): runtime.Types.Utils.JsPromise<TResult1 | TResult2>;
     catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): runtime.Types.Utils.JsPromise<T | TResult>;
     finally(onfinally?: (() => void) | undefined | null): runtime.Types.Utils.JsPromise<T>;
@@ -1079,6 +1320,8 @@ export interface UserFieldRefs {
     readonly refreshTokenHash: Prisma.FieldRef<"User", 'String'>;
     readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>;
     readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>;
+    readonly pdpaAccepted: Prisma.FieldRef<"User", 'Boolean'>;
+    readonly pdpaAcceptedAt: Prisma.FieldRef<"User", 'DateTime'>;
 }
 export type UserFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     select?: Prisma.UserSelect<ExtArgs> | null;
@@ -1232,6 +1475,17 @@ export type User$studyLogsArgs<ExtArgs extends runtime.Types.Extensions.Internal
     take?: number;
     skip?: number;
     distinct?: Prisma.RoomStudyLogScalarFieldEnum | Prisma.RoomStudyLogScalarFieldEnum[];
+};
+export type User$questionnaireStatusesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    select?: Prisma.QuestionnaireStatusSelect<ExtArgs> | null;
+    omit?: Prisma.QuestionnaireStatusOmit<ExtArgs> | null;
+    include?: Prisma.QuestionnaireStatusInclude<ExtArgs> | null;
+    where?: Prisma.QuestionnaireStatusWhereInput;
+    orderBy?: Prisma.QuestionnaireStatusOrderByWithRelationInput | Prisma.QuestionnaireStatusOrderByWithRelationInput[];
+    cursor?: Prisma.QuestionnaireStatusWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.QuestionnaireStatusScalarFieldEnum | Prisma.QuestionnaireStatusScalarFieldEnum[];
 };
 export type UserDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     select?: Prisma.UserSelect<ExtArgs> | null;

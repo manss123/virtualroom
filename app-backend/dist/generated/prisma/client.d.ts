@@ -12,3 +12,4 @@ export type PrePostTest = Prisma.PrePostTestModel;
 export type SelfRegAssessment = Prisma.SelfRegAssessmentModel;
 export type RoomPlan = Prisma.RoomPlanModel;
 export type RoomStudyLog = Prisma.RoomStudyLogModel;
+export type QuestionnaireStatus = Prisma.QuestionnaireStatusModel;
