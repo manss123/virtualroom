@@ -5,7 +5,7 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { RegisterDto, LoginDto } from "./dto";
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
 
 const ACCESS_TTL_SEC = 15 * 60;

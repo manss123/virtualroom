@@ -6,6 +6,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ["@nuxt/eslint", "@nuxt/image", "@nuxt/ui"],
   css: ["~/assets/css/tailwind.css"],
+  runtimeConfig: {
+    public: {
+      apiBase: import.meta.env.NUXT_PUBLIC_API_BASE || "http://localhost:4000",
+    },
+  },
   vite: {
     plugins: [tailwindcss()],
   },
