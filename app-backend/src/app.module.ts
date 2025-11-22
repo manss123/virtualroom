@@ -4,6 +4,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module'
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module'
+import { QuestionnairesModule } from './questionnaires/questionnaires.module'
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthService } from './auth/auth.service';
@@ -18,6 +19,7 @@ import { UsersService } from './users/users.service';
     PrismaModule,
     AuthModule,
     UsersModule,
+    QuestionnairesModule,
   ],
   providers: [AuthService, UsersService],
   controllers: [AuthController, UsersController],

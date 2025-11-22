@@ -6,30 +6,29 @@
         เข้าสู่ห้องเรียน 360° กับบทเรียนเรื่องเฟือง <br>
         ที่จะพาไปสู่โลกกว้างและกิจกรรมสนุกๆมากมายต่อที่แคมป์ <br>
       </div>
-      <form class="flex flex-col justify-center items-center w-full gap-6" @submit.prevent="onSubmit">
-        <div class="flex flex-col justify-center items-start">
-          <div class="text-[24px]">
-            อีเมล*
-          </div>
-          <div class="text-[24px]">
-            <input v-model="form.email" class="bg-white text-black rounded-[15px] w-[700px] h-20 pl-5" type="email"
-              name="email" id="email" required>
-          </div>
+      <form class="flex flex-col justify-center items-start w-full gap-6" @submit.prevent="onSubmit">
+        <div class="text-[24px]">
+          อีเมล*
+        </div>
+        <div class="text-[24px]">
+          <input v-model="form.email" class="bg-white text-black rounded-[15px] w-[700px] h-[80px] pl-5"
+            type="email" name="email" id="email" required>
         </div>
         <div class="flex flex-col justify-center items-start">
           <div class="text-[24px]">
             รหัสผ่าน*
           </div>
           <div class="text-[24px]">
-            <input v-model="form.password" class="bg-white text-black rounded-[15px] w-[700px] h-20 pl-5"
+            <input v-model="form.password" class="bg-white text-black rounded-[15px] w-[700px] h-[80px] pl-5"
               type="password" name="password" id="password" required>
           </div>
           <div class="text-white text-[24px] mt-10">
             *ข้อมูลที่นักเรียนจำเป็นต้องกรอก
           </div>
         </div>
-        <div class="flex flex-col gap-4 w-full items-center justify-start">
-          <button type="submit" class="flex w-fit h-[70px] px-20 bg-[#FFC233] text-black hover:bg-[#B97530] hover:text-white drop-shadow-xl font-medium
+        <div class="flex flex-col gap-4 w-full items-start">
+          <button type="submit"
+            class="flex w-fit h-[70px] px-20 bg-[#FFC233] text-black hover:bg-[#B97530] hover:text-white drop-shadow-xl font-medium
 rounded-[15px] items-center justify-center cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             :disabled="submitting">
             {{ submitting ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ' }}

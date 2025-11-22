@@ -7,6 +7,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { RegisterDto, LoginDto } from "./dto";
 import * as bcrypt from "bcrypt";
 import { JwtService } from "@nestjs/jwt";
+import { QuestionnaireType } from "../../generated/prisma/client";
 
 const ACCESS_TTL_SEC = 15 * 60;
 const REFRESH_TTL_SEC = 7 * 24 * 60 * 60;
@@ -41,6 +42,17 @@ export class AuthService {
           },
         },
       },
+    });
+
+    await this.prisma.questionnaireStatus.createMany({
+      data: [
+        QuestionnaireType.PDPA_CONSENT,
+        QuestionnaireType.PRE_TEST,
+        QuestionnaireType.PRE_SURVEY,
+        QuestionnaireType.POST_TEST,
+        QuestionnaireType.POST_SURVEY,
+      ].map((type) => ({ userId: user.id, type })),
+      skipDuplicates: true,
     });
 
     const { accessToken, refreshToken } = this.signTokens(user.id);
