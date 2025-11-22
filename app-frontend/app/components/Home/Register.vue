@@ -5,7 +5,7 @@
     </div>
 
     <div class="flex w-fit h-full items-center justify-start">
-      <div class="flex flex-col w-full justify-start items-center text-[24px] gap-8">
+      <form class="flex flex-col w-full justify-start items-center text-[24px] gap-8" @submit.prevent="onSubmit">
         <div class="w-full text-[36px] text-[#FFC233] font-medium">
           กรอกข้อมูลนักเรียนเพิ่มเติมลงในฟอร์มได้เลยครับ
         </div>
@@ -87,6 +87,19 @@
           </div>
         </div>
 
+        <div class="flex w-full gap-14">
+          <div class="flex flex-col">
+            <div class="text-white h-[36px]">อีเมล*</div>
+            <input v-model="form.email" class="w-[350px] h-[80px] px-5 bg-[#EFF7F7] rounded-[15px]" type="email"
+              required />
+          </div>
+          <div class="flex flex-col">
+            <div class="text-white h-[36px]">รหัสผ่าน* (อย่างน้อย 6 ตัวอักษร)</div>
+            <input v-model="form.password" minlength="6" class="w-[350px] h-[80px] px-5 bg-[#EFF7F7] rounded-[15px]"
+              type="password" required />
+          </div>
+        </div>
+
         <div class="flex w-full text-white">
           *ข้อมูลที่นักเรียนจำเป็นต้องกรอก
         </div>
@@ -95,17 +108,19 @@
           xxx@gmail.com
         </div>
 
-        <div class="flex flex-col gap-4 items-center justify-center">
+        <div class="flex flex-col gap-4 items-center justify-center w-full">
           <button
-            class="flex w-fit h-[70px] px-10 bg-[#FFC233] text-black hover:bg-[#B97530] hover:text-white cursor-pointer drop-shadow-xl font-medium rounded-[15px] items-center justify-center"
-            type="button" @click="onSubmit">
-            ไปต่อ
+            class="flex w-fit h-[70px] px-10 bg-[#FFC233] text-black hover:bg-[#B97530] hover:text-white cursor-pointer drop-shadow-xl font-medium rounded-[15px] items-center justify-center disabled:opacity-60 disabled:cursor-not-allowed"
+            type="submit" :disabled="submitting">
+            {{ submitting ? 'กำลังสมัคร...' : 'ไปต่อ' }}
           </button>
+          <div v-if="error" class="text-red-200 text-[18px]">{{ error }}</div>
+          <div v-if="success" class="text-green-200 text-[18px]">{{ success }}</div>
           <button class="underline text-white cursor-pointer" type="button" @click="auth.setPage('Login')">
             กลับไปหน้าเข้าสู่ระบบ
           </button>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 </template>
@@ -113,6 +128,7 @@
 <script setup lang="ts">
 const { getImageURL } = useAssetUrl()
 const auth = useAuthView()
+const config = useRuntimeConfig()
 
 // สถานะฟอร์มพื้นฐาน
 const form = reactive({
@@ -122,8 +138,14 @@ const form = reactive({
   age: undefined as number | undefined,
   grade: '',
   school: '',
-  classCode: ''
+  classCode: '',
+  email: '',
+  password: '',
 })
+
+const submitting = ref(false)
+const error = ref('')
+const success = ref('')
 
 // อายุช่วงตัวอย่าง (ปรับได้ตามช่วงอายุจริงของผู้เรียน)
 const ages = Array.from({ length: 5 }, (_, i) => i + 13) // 10–20 ปี
@@ -131,4 +153,40 @@ const ages = Array.from({ length: 5 }, (_, i) => i + 13) // 10–20 ปี
 // ระดับชั้น (ปรับให้ตรงกับโครงการจริง)
 const primaryGrades = ['ป.4', 'ป.5', 'ป.6']
 const secondaryGrades = ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6']
+
+const onSubmit = async () => {
+  error.value = ''
+  success.value = ''
+
+  if (!form.age) {
+    error.value = 'กรุณาเลือกอายุ'
+    return
+  }
+
+  submitting.value = true
+  try {
+    await $fetch(`${config.public.apiBase}/auth/register`, {
+      method: 'POST',
+      credentials: 'include',
+      body: {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        sex: form.sex,
+        age: form.age,
+        grade: form.grade,
+        school: form.school,
+        email: form.email,
+        password: form.password,
+      },
+    })
+    success.value = 'สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบด้วยอีเมลและรหัสผ่านของคุณ'
+    auth.setPage('Login')
+  } catch (err: any) {
+    error.value = err?.data?.message ?? 'ไม่สามารถสมัครสมาชิกได้ กรุณาลองใหม่อีกครั้ง'
+  } finally {
+    submitting.value = false
+  }
+}
 </script>
+
+<style></style>

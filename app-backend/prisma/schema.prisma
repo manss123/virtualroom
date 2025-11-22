@@ -24,11 +24,12 @@ model User {
   school           String?
   grade            String?
   identities       AuthIdentity[]
-  refreshTokenHash String?           
+  refreshTokenHash String?
   prePostTests     PrePostTest[]
   selfRegs         SelfRegAssessment[]
   roomPlans        RoomPlan[]
   studyLogs        RoomStudyLog[]
+  questionnaireStatuses QuestionnaireStatus[]
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @updatedAt
 }
@@ -91,5 +92,31 @@ model RoomStudyLog {
     user        User     @relation(fields: [userId], references: [id])
 
     @@index([userId, roomKey, startAt])
+}
+
+enum QuestionnaireType {
+    PDPA_CONSENT
+    PRE_TEST
+    PRE_SURVEY
+    POST_TEST
+    POST_SURVEY
+}
+
+enum QuestionnaireStatusState {
+    NOT_STARTED
+    IN_PROGRESS
+    COMPLETED
+}
+
+model QuestionnaireStatus {
+    id          String                     @id @default(cuid())
+    userId      String
+    type        QuestionnaireType
+    status      QuestionnaireStatusState   @default(NOT_STARTED)
+    completedAt DateTime?
+    updatedAt   DateTime                   @updatedAt
+    user        User                       @relation(fields: [userId], references: [id])
+
+    @@unique([userId, type])
 }
 
