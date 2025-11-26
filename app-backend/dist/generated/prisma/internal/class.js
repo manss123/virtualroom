@@ -10,7 +10,7 @@ const config = {
             "value": "prisma-client"
         },
         "output": {
-            "value": "C:\\Users\\User\\Desktop\\Works\\virtualroom\\app-backend\\generated\\prisma",
+            "value": "C:\\Users\\beers\\Desktop\\Works\\virtualroom\\app-backend\\generated\\prisma",
             "fromEnvVar": null
         },
         "config": {
@@ -24,7 +24,7 @@ const config = {
             }
         ],
         "previewFeatures": [],
-        "sourceFilePath": "C:\\Users\\User\\Desktop\\Works\\virtualroom\\app-backend\\prisma\\schema.prisma",
+        "sourceFilePath": "C:\\Users\\beers\\Desktop\\Works\\virtualroom\\app-backend\\prisma\\schema.prisma",
         "isCustomOutput": true
     },
     "relativePath": "../../prisma",

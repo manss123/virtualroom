@@ -45,7 +45,7 @@ rounded-[15px] items-center justify-center cursor-pointer disabled:opacity-60 di
         </button>
       </div>
     </div>
-    <div class="absolute -bottom-50">
+    <div class="absolute -bottom-50 hidden 3xl:flex">
       <img class="w-[840px] h-[610px]" :src="getImageURL('images/cartoons/gear-greet.png')" alt="">
     </div>
   </div>

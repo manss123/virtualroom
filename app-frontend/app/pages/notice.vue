@@ -1,7 +1,10 @@
 <template>
-    <div class="flex w-full h-full text-white items-center justify-center">
+    <div class="flex w-full h-full text-white items-center justify-center overflow-auto">
+        <div class="flex w-fit h-full items-center justify-end">
+            <img class="w-auto h-auto" :src="getImageURL('images/cartoons/gear-ghost.png')" alt="">
+        </div>
         <div
-            class="relative flex flex-col items-center justify-start lg:w-[1044px] lg:h-fit bg-[#C4C5C54D] rounded-nw shadow-[#FFC233] shadow-md">
+            class="relative flex flex-col items-center justify-start lg:w-[844px] lg:h-fit bg-[#C4C5C54D] rounded-nw shadow-[#FFC233] shadow-md">
             <div class="text-[36px] font-medium text-[#FFC233] py-9">
                 แจ้งให้นักเรียนทราบครับ !!
             </div>
@@ -23,9 +26,6 @@
             rounded-[15px] items-center justify-center cursor-pointer">
                 พร้อมทำแบบทดสอบ
             </button>
-            <div class="absolute -left-80 flex w-fit h-full items-center justify-end">
-                <img class="w-auto h-auto" :src="getImageURL('images/cartoons/gear-ghost.png')" alt="">
-            </div>
         </div>
 
     </div>
