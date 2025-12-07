@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full h-full items-center justify-center gap-10">
+  <div class="flex w-full items-center justify-center gap-10 overflow-auto">
     <div class="flex w-fit h-full items-center justify-end">
       <img class="w-auto h-[750px]" :src="getImageURL('images/cartoons/gear-point.png')" alt="">
     </div>
