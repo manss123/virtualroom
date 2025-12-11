@@ -32,10 +32,10 @@
 </template>
 
 <script setup lang="ts">
-import { useAuth } from '~/composables/useAuth'
-definePageMeta({ middleware: ['auth'] })
+// import { useAuth } from '~/composables/useAuth'
+// definePageMeta({ middleware: ['auth'] })
 
-const { user, ready } = useAuth()
+// const { user, ready } = useAuth()
 
 const { getImageURL } = useAssetUrl()
 

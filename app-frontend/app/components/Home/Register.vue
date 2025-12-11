@@ -127,11 +127,14 @@
 </template>
 
 <script setup lang="ts">
+import { useFirebaseSession } from '~/composables/useAuth'
+
 const { getImageURL } = useAssetUrl()
 const auth = useAuthView()
-const config = useRuntimeConfig()
+const router = useRouter()
 
-// สถานะฟอร์มพื้นฐาน
+const { registerWithProfile } = useFirebaseSession()
+
 const form = reactive({
   firstName: '',
   lastName: '',
@@ -142,16 +145,14 @@ const form = reactive({
   classCode: '',
   email: '',
   password: '',
+  pdpa: true
 })
 
 const submitting = ref(false)
 const error = ref('')
 const success = ref('')
 
-// อายุช่วงตัวอย่าง (ปรับได้ตามช่วงอายุจริงของผู้เรียน)
-const ages = Array.from({ length: 5 }, (_, i) => i + 13) // 10–20 ปี
-
-// ระดับชั้น (ปรับให้ตรงกับโครงการจริง)
+const ages = Array.from({ length: 8 }, (_, i) => i + 11) // ตัวอย่างช่วงอายุ
 const primaryGrades = ['ป.4', 'ป.5', 'ป.6']
 const secondaryGrades = ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6']
 
@@ -166,28 +167,44 @@ const onSubmit = async () => {
 
   submitting.value = true
   try {
-    await $fetch(`${config.public.apiBase}/auth/register`, {
-      method: 'POST',
-      credentials: 'include',
-      body: {
-        firstName: form.firstName,
-        lastName: form.lastName,
-        sex: form.sex,
-        age: form.age,
-        grade: form.grade,
-        school: form.school,
-        email: form.email,
-        password: form.password,
-      },
+    await registerWithProfile({
+      email: form.email,
+      password: form.password,
+      firstName: form.firstName,
+      lastName: form.lastName,
+      sex: form.sex,
+      age: form.age,
+      grade: form.grade,
+      school: form.school,
+      classCode: form.classCode,
+      pdpa: form.pdpa
     })
-    success.value = 'สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบด้วยอีเมลและรหัสผ่านของคุณ'
-    auth.setPage('Login')
+
+    // สมัคร + login + สร้าง session เสร็จแล้ว
+    success.value = 'สมัครสมาชิกสำเร็จ!'
+    await router.push('/pdpa') // หรือจะให้กลับหน้า Login ก็ได้
   } catch (err: any) {
-    error.value = err?.data?.message ?? 'ไม่สามารถสมัครสมาชิกได้ กรุณาลองใหม่อีกครั้ง'
-  } finally {
+    const code = err?.code as string | undefined;
+
+    console.log(code)
+
+    if (code === 'classCode/invalid') {
+      error.value = 'รหัสที่ได้รับไม่ถูกต้อง กรุณาตรวจสอบอีกครั้งหรือติดต่อครูผู้สอน';
+    } else if (code === 'classCode/misconfigured') {
+      error.value = 'รหัสนี้ยังตั้งค่าไม่สมบูรณ์ โปรดติดต่อครูผู้สอน';
+    } else if (code === 'auth/email-already-in-use') {
+      error.value = 'อีเมลนี้ถูกใช้สมัครแล้ว';
+    } else if (code === 'auth/weak-password') {
+      error.value = 'รหัสผ่านสั้นเกินไป (อย่างน้อย 6 ตัวอักษร)';
+    } else {
+      error.value = 'ไม่สามารถสมัครสมาชิกได้ กรุณาลองใหม่อีกครั้ง';
+    }
+  }
+  finally {
     submitting.value = false
   }
 }
 </script>
+
 
 <style></style>

@@ -1,0 +1,18 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // โปรไฟล์นักเรียน
+    match /students/{uid} {
+      // อ่าน/เขียนได้เฉพาะเจ้าของ uid เท่านั้น
+      allow create, read, update, delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    match /classGroups/{classCode} {
+      // allow get: if request.auth != null;
+      // ถ้าอยากให้ทุกคน (แม้ยังไม่ login) อ่าน code ได้:
+      allow get: if true;
+    }
+  }
+}

@@ -66,13 +66,12 @@ rounded-[15px] items-center justify-center cursor-pointer disabled:opacity-60 di
 </template>
 
 <script lang="ts" setup>
-// import { useAuth } from '~/composables/useAuth'
+import { useFirebaseSession } from '~/composables/useAuth'
 
 const { getImageURL } = useAssetUrl()
 const auth = useAuthView()
-const { login } = useAuth()
+const { loginAndAttachSession } = useFirebaseSession()
 
-const config = useRuntimeConfig()
 const form = reactive({
   email: '',
   password: '',
@@ -81,26 +80,29 @@ const form = reactive({
 const submitting = ref(false)
 const error = ref('')
 const success = ref('')
-
 const router = useRouter()
-
-const emit = defineEmits<{
-  (e: 'changePage'): void
-}>()
 
 const onSubmit = async () => {
   error.value = ''
   success.value = ''
   submitting.value = true
   try {
-    await login(form)
-    await router.push('/pdpa') // ไปหน้า PDPA
+    await loginAndAttachSession(form.email, form.password)
+    await router.push('/pdpa')
   } catch (err: any) {
-    error.value = err?.data?.message ?? 'ไม่สามารถเข้าสู่ระบบได้ กรุณาลองอีกครั้ง'
+    const code = err?.code as string | undefined
+    if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
+      error.value = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
+    } else if (code === 'auth/user-not-found') {
+      error.value = 'ไม่พบบัญชีผู้ใช้ในระบบ'
+    } else {
+      error.value = 'ไม่สามารถเข้าสู่ระบบได้ กรุณาลองอีกครั้ง'
+    }
   } finally {
     submitting.value = false
   }
 }
 </script>
+
 
 <style></style>

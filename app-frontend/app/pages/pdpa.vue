@@ -119,8 +119,8 @@
 <script setup lang="ts">
 definePageMeta({ middleware: ['auth'] })
 
-import { useAuth } from '~/composables/useAuth'
-const { user, refreshMe } = useAuth()
+// import { useAuth } from '~/composables/useAuth'
+// const { user, refreshMe } = useAuth()
 const { getImageURL } = useAssetUrl()
 
 const accepted = ref(false)
