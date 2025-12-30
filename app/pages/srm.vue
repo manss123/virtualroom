@@ -118,7 +118,7 @@ import {
     SRM_QUESTIONNAIRE_SECTIONS,
 } from '@/config/srmConfig';
 
-definePageMeta({ middleware: ['auth'] });
+// definePageMeta({ middleware: ['auth'] });
 
 const { getImageURL } = useAssetUrl();
 
@@ -305,6 +305,11 @@ const submitAll = async () => {
         await $fetch(`/api/srm/${props.mode}`, {
             method: 'POST',
             body: payload,
+        });
+
+        await $fetch("/api/progress", {
+            method: "POST",
+            body: { questionnaireDone: true },
         });
 
         alert('บันทึกผลแบบประเมิน SRM เรียบร้อยแล้ว');

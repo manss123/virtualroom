@@ -128,10 +128,10 @@ const accepted = ref(false)
 const config = useRuntimeConfig()
 
 const accept = async () => {
-    // await $fetch(`${config.public.apiBase}/users/pdpa-accept`, {
-    //     method: 'POST',
-    //     credentials: 'include'
-    // })
+    await $fetch("/api/progress", {
+        method: "POST",
+        body: { pdpaDone: true },
+    });
     return navigateTo('/notice', { replace: true })
 }
 </script>

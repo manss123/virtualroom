@@ -395,6 +395,12 @@ const submitAll = async () => {
             body: payload,
         });
 
+        await $fetch("/api/progress", {
+            method: "POST",
+            body: { preTestDone: true },
+        });
+
+
         console.log("✅ Server test result:", res.result);
         alert("บันทึกผลแบบทดสอบเรียบร้อยแล้ว");
 

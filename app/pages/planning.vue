@@ -166,9 +166,9 @@
 <script setup lang="ts">
 import { ref, computed, watchEffect } from "vue";
 
-definePageMeta({
-    middleware: ["auth"],
-});
+// definePageMeta({
+//     middleware: ["auth"],
+// });
 
 const router = useRouter();
 const { getImageURL } = useAssetUrl();
@@ -433,7 +433,14 @@ async function savePlan() {
                 rooms: rooms.value,
             },
         });
+
+        await $fetch("/api/progress", {
+            method: "POST",
+            body: { planningDone: true },
+        });
+        
         saveSuccess.value = true;
+        router.push("/welcome");
     } catch (err: any) {
         console.error(err);
         errorMessage.value =

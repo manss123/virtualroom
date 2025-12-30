@@ -50,9 +50,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 
-definePageMeta({
-    middleware: ["auth"], // ใช้ middleware เดียวกับหน้าแบบทดสอบ
-});
+// definePageMeta({
+//     middleware: ["auth"], // ใช้ middleware เดียวกับหน้าแบบทดสอบ
+// });
 
 const { getImageURL } = useAssetUrl();
 const router = useRouter();

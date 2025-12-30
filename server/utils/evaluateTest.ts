@@ -13,28 +13,28 @@ const CODE_SCORE: Record<string, number> = {
   LK4: 0,
 };
 
-function classifyFromFlags(D: number, E: number, F: number, G: number): string {
-  if (D === 1 && E === 1 && F === 1 && G === 1) return "SC";
+const TIER_CODE: Record<string, string> = {
+  "1111": "SC",
+  "1110": "LK1",
+  "1011": "LK1",
+  "1010": "LK1",
+  "1101": "FP",
+  "1100": "LK2",
+  "1001": "LK2",
+  "1000": "LK2",
+  "0111": "FN",
+  "0110": "LK3",
+  "0011": "LK3",
+  "0010": "LK3",
+  "0101": "MSC",
+  "0100": "LK4",
+  "0001": "LK4",
+  "0000": "LK4",
+};
 
-  if (D === 1 && E === 1 && F === 1 && G === 0) return "LK1";
-  if (D === 1 && E === 0 && F === 1 && G === 1) return "LK1";
-  if (D === 1 && E === 0 && F === 1 && G === 0) return "LK1";
-
-  if (D === 1 && E === 1 && F === 0 && G === 1) return "FP";
-
-  if (D === 1 && E === 1 && F === 0 && G === 0) return "LK2";
-  if (D === 1 && E === 0 && F === 0 && G === 1) return "LK2";
-  if (D === 1 && E === 0 && F === 0 && G === 0) return "LK2";
-
-  if (D === 0 && E === 1 && F === 1 && G === 1) return "FN";
-
-  if (D === 0 && E === 1 && F === 1 && G === 0) return "LK3";
-  if (D === 0 && E === 0 && F === 1 && G === 1) return "LK3";
-  if (D === 0 && E === 0 && F === 1 && G === 0) return "LK3";
-
-  if (D === 0 && E === 1 && F === 0 && G === 1) return "MSC";
-
-  return "LK4";
+function classifyFromFlags(D: number, F: number, E: number, G: number): string {
+  const key = `${D}${F}${E}${G}`;
+  return TIER_CODE[key] ?? "LK4";
 }
 
 // ====== flags per QUESTION j (use 1.1 / 1.2 / 1.3 / 1.4 pattern) ======
@@ -224,7 +224,7 @@ export function evaluateTest(params: EvaluateParams) {
     // ---- question-level D,E,F,G + tier code ----
     const flags = computeFlagsForQuestion(q, qAnswers);
     const { D, E, F, G } = flags;
-    const code = classifyFromFlags(D, E, F, G);
+    const code = classifyFromFlags(D, F, E, G);
     const score = CODE_SCORE[code];
 
     flagsByQuestionId[q.id] = flags;
