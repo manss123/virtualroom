@@ -284,7 +284,7 @@ type TestGetResponse = {
     percent?: number;
     conceptScores?: Record<string, number>;
     learningPath?: LearningPathItem[];
-    itemScoresByQuestionId?: Record<string, number>; // ✅ add this
+    itemScoresByQuestionId?: Record<string, number>;
   };
   learningPath?: LearningPathItem[];
 };
@@ -338,6 +338,7 @@ const preScoreText = computed(() => {
 
 const postScoreText = computed(() => {
   const item = sumItemScores(postTest.value?.result?.itemScoresByQuestionId);
+  console.log('post score', item)
   if (item) return Math.round(item.sum); // ✅ use raw sum score
   const p = postTest.value?.result?.percent;
   return typeof p === "number" ? Math.round(p) : "-";
@@ -345,11 +346,13 @@ const postScoreText = computed(() => {
 
 const preTotalText = computed(() => {
   const item = sumItemScores(preTest.value?.result?.itemScoresByQuestionId);
+  console.log('preTotalText', item)
   return item ? item.total * 7 : 7 * 17;
 });
 
 const postTotalText = computed(() => {
   const item = sumItemScores(postTest.value?.result?.itemScoresByQuestionId);
+  console.log('postTotalText', item)
   return item ? item.total * 7 : 7 * 17;
 });
 
