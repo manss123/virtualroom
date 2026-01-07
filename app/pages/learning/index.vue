@@ -10,27 +10,33 @@
 
     <!-- overlay content -->
     <div
-      class="relative z-10 h-full flex flex-col items-center justify-start lg:justify-center py-8 px-4 text-white bg-black/85"
-    >
+      class="relative z-10 h-full flex flex-col items-center justify-start lg:justify-center py-8 px-4 text-white bg-black/85">
       <!-- header -->
       <LearningTopBarVue title="VIRTUAL 360° ROOM" progressMode="time" />
-      
-      <div class="w-full max-w-6xl text-center">
+
+      <div class="w-full max-w-6xl text-center mt-[500px] 3xl:mt-0 py-20">
         <p class="text-center mt-2 text-4xl">
           นักเรียนเลือกห้องเรียนได้เลยครับ
         </p>
+
+        <!-- v-if finished all personalized classes & reflection, show post-test route button -->
+        <div v-if="canDoPostTest"
+          class="w-full rounded-nw shadow-sm shadow-[#FFC233] p-5 mt-5 text-2xl flex items-center justify-evenly">
+          <div>
+            มาทำแบบทดสอบหลังเรียนกันเถอะ!
+          </div>
+          <button
+            class="px-10 py-4 rounded-nw bg-[#FFC233] text-black font-medium cursor-pointer hover:bg-[#B97530] hover:text-white"
+            @click="router.push('/posttest')">
+            เริ่มทำแบบดทดสอบ
+          </button>
+        </div>
         <!-- cards -->
         <div
-          class="mt-8 grid gap-20 w-full lg:grid-cols-3 md:grid-cols-2 grid-cols-1 justify-center items-stretch place-items-center"
-        >
-          <div
-            v-for="room in rooms"
-            :key="room.key"
-            class="relative rounded-nw overflow-hidden shadow-xl w-[300px]"
-            :class="
-              room.unlocked ? ' bg-white/95' : 'bg-white/40 text-gray-500'
-            "
-          >
+          class="mt-20 grid gap-20 w-full lg:grid-cols-3 md:grid-cols-2 grid-cols-1 justify-center items-stretch place-items-center">
+          <div v-for="room in rooms" :key="room.key" class="relative rounded-nw overflow-hidden shadow-xl w-[300px]"
+            :class="room.unlocked ? ' bg-white/95' : 'bg-white/40 text-gray-500'
+              ">
             <!-- label + button -->
             <div class="p-4 flex flex-col items-center">
               <!-- <div
@@ -47,26 +53,15 @@
             <div class="relative h-60 w-full flex justify-center items-center">
               <button
                 class="absolute bottom-0 mt-auto w-10/12 h-11 flex items-center justify-center rounded-lg text-sm font-semibold shadow-lg mb-4"
-                :class="
-                  room.unlocked
-                    ? 'bg-[#FFC233] text-black hover:bg-[#B97530] hover:text-white'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                "
-                :disabled="!room.unlocked"
-                @click="enterRoom(room)"
-              >
+                :class="room.unlocked
+                  ? 'bg-[#FFC233] text-black hover:bg-[#B97530] hover:text-white'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  " :disabled="!room.unlocked" @click="enterRoom(room)">
                 เริ่มเรียน
               </button>
-              <img
-                :src="room.cardImage"
-                alt=""
-                class="w-full h-full object-cover"
-              />
+              <img :src="room.cardImage" alt="" class="w-full h-full object-cover" />
               <!-- lock overlay -->
-              <div
-                v-if="!room.unlocked"
-                class="absolute inset-0 bg-black/30 flex items-center justify-center"
-              >
+              <div v-if="!room.unlocked" class="absolute inset-0 bg-black/30 flex items-center justify-center">
                 <!-- <img src="/icons/lock.svg" alt="locked" class="w-14 h-14" /> -->
               </div>
             </div>
@@ -90,9 +85,9 @@ import {
 import type { ProgressState } from "~/types/progress";
 import LearningTopBarVue from "~/components/LearningTopBar.vue.vue";
 
-// definePageMeta({
-//   middleware: ["auth"],
-// });
+definePageMeta({
+  middleware: ["auth"],
+});
 
 const router = useRouter();
 
@@ -149,16 +144,22 @@ const progressPercent = computed(() => {
 });
 
 // ---------- load pre-test + progress + learning-plan ----------
+
+let orderedKeys: LearningRoomKey[]
+
 try {
   const [
     { data: preData, error: preErr },
     { data: progData },
     { data: planData },
+    { data: meData },
   ] = await Promise.all([
     useFetch("/api/tests/pre", { method: "GET" }),
     useFetch("/api/progress", { method: "GET" }),
     useFetch("/api/learning-plan", { method: "GET" }),
+    useFetch("/api/auth/me", { method: "GET" }),
   ]);
+
 
   if (preErr.value) throw preErr.value;
 
@@ -170,7 +171,7 @@ try {
     .map((i) => i.conceptId);
 
   // ordered learning sequence based on fuzzy path
-  const orderedKeys: LearningRoomKey[] = [
+  orderedKeys = [
     "intro1",
     ...(conceptsInPath as LearningRoomKey[]),
     "intro2",
@@ -238,13 +239,26 @@ try {
     "ไม่สามารถโหลดแผนการเรียนได้";
 }
 
+const completedSet = computed(() => new Set(progress.value?.completedRooms ?? []));
+
+const finishedAllPersonalizedRooms = computed(() => {
+  // orderedKeys is your personalized sequence: intro1 + conceptsInPath + intro2
+  return orderedKeys.every((k) => completedSet.value.has(k));
+});
+
+const reflectionDone = computed(() => !!progress.value?.reflection?.submitted);
+
+const canDoPostTest = computed(() => {
+  return finishedAllPersonalizedRooms.value && reflectionDone.value;
+});
+
+
 // ---------- actions ----------
 function enterRoom(room: RoomCard) {
   if (!room.unlocked) return;
   router.push({
     path: "/virtualroom",
-    query: { room: room.sceneId },
+    query: { room: room.key }, // ✅ use key
   });
 }
 </script>
-

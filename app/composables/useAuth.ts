@@ -1,12 +1,14 @@
-// app/composables/useAuth.ts
 import { useNuxtApp } from "#app";
 import {
   signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
   getIdToken,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { FirebaseError } from "firebase/app";
+import { useAuthState } from "./useAuthState";
 
 type RegisterPayload = {
   email: string;
@@ -21,10 +23,25 @@ type RegisterPayload = {
   pdpa: boolean;
 };
 
+type CompleteProfilePayload = {
+  firstName: string;
+  lastName: string;
+  sex: "ชาย" | "หญิง" | "";
+  age: number;
+  grade: string;
+  school: string;
+  classCode: string;
+  pdpa: boolean;
+};
+
+function extractApiCode(err: any): string | undefined {
+  // Nuxt $fetch errors often look like: err.data = { statusCode, statusMessage, data: { code } }
+  return err?.data?.data?.code || err?.data?.code || err?.cause?.data?.data?.code;
+}
+
 export function useFirebaseSession() {
   const nuxtApp = useNuxtApp();
 
-  // ⛔️ บน server ยังไม่มี Firebase web SDK → คืน stub ฟังก์ชัน
   if (import.meta.server) {
     return {
       async registerWithProfile() {
@@ -40,107 +57,114 @@ export function useFirebaseSession() {
     };
   }
 
-  const $firebase = nuxtApp.$firebase as
-    | {
-        auth: any;
-        firestore: any;
-      }
-    | undefined;
+  const $firebase = nuxtApp.$firebase as { auth: any; firestore: any } | undefined;
+  if (!$firebase) throw new Error("Firebase plugin not initialized.");
 
-  if (!$firebase) {
-    throw new Error(
-      "Firebase plugin not initialized. Did you create plugins/firebase.client.ts?"
-    );
+  const { auth } = $firebase;
+
+  async function registerWithProfile(payload: RegisterPayload) {
+  const { email, password, ...profile } = payload;
+
+  // 1) ask server to create user + profile
+  await $fetch("/api/auth/register", {
+    method: "POST",
+    body: { email, password, ...profile },
+  });
+
+  // 2) sign in on client (you already have email/password)
+  const { user } = await signInWithEmailAndPassword(auth, email, password);
+
+  // 3) attach session cookie
+  const idToken = await getIdToken(user, true);
+  await $fetch("/api/auth/session", { method: "POST", body: { idToken } });
+
+  const { refreshAuth } = useAuthState();
+  await refreshAuth();
+
+
+  return user;
+}
+
+async function attachSession(user: any) {
+    const idToken = await getIdToken(user, true);
+    await $fetch("/api/auth/session", { method: "POST", body: { idToken } });
+
+    const { refreshAuth } = useAuthState();
+    await refreshAuth();
   }
 
-  const { auth, firestore } = $firebase;
-
-  /** สร้าง user + profile ใน Firestore + แนบ session cookie */
-  async function registerWithProfile(payload: RegisterPayload) {
-    const { email, password, ...profile } = payload;
+  async function loginWithGoogleAndAttachSession() {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
 
     try {
-      // 1) ตรวจสอบ classCode ก่อน (อย่าเพิ่งสร้าง user)
-      const classRef = doc(firestore, "classGroups", profile.classCode);
-      const classSnap = await getDoc(classRef);
-
-      if (!classSnap.exists()) {
-        const err: any = new Error("Invalid class code");
-        err.code = "classCode/invalid";
-        throw err;
-      }
-
-      const classData = classSnap.data() as {
-        experimentGroup?: "A" | "B";
-        name?: string;
-        grade?: string;
-        school?: string;
-      };
-
-      if (!classData.experimentGroup) {
-        const err: any = new Error("Class group missing experimentGroup");
-        err.code = "classCode/misconfigured";
-        throw err;
-      }
-
-      // 2) สร้างผู้ใช้ใน Firebase Auth
-      const { user } = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-      // 3) บันทึก profile ใน Firestore (collection: students)
-      const ref = doc(firestore, "students", user.uid);
-      await setDoc(ref, {
-        ...profile,
-        email,
-        classCode: profile.classCode,
-        experimentGroup: classData.experimentGroup, // ⬅ กลุ่ม A / B ติดไว้ที่ student
-        classGroupId: classRef.id, // ⬅ ไว้อ้างอิงย้อนกลับ (optional)
-        classGroupName: classData.name ?? null, // optional: ชื่อห้อง
-        createdAt: serverTimestamp(),
-      });
-
-      // 4) แนบ session ให้ server (cookie ผ่าน API route)
-      const idToken = await getIdToken(user, true);
-      await $fetch("/api/auth/session", {
-        method: "POST",
-        body: { idToken },
-      });
-
+      // ✅ best on desktop
+      const { user } = await signInWithPopup(auth, provider);
+      await attachSession(user);
       return user;
-    } catch (e) {
-      const err = e as any;
-      console.error("[registerWithProfile] error:", err);
-      // โยน error ต่อไปให้ Register.vue ตัดสินใจแสดงข้อความ
-      throw err;
+    } catch (e: any) {
+      // 🔁 fallback for popup-blocked browsers (often Safari / strict settings)
+      if (
+        e?.code === "auth/popup-blocked" ||
+        e?.code === "auth/popup-closed-by-user" ||
+        e?.code === "auth/cancelled-popup-request"
+      ) {
+        await signInWithRedirect(auth, provider);
+        return null;
+      }
+      throw e;
     }
   }
 
-  /** login ปกติ + แนบ session ให้ Nuxt */
+  async function completeGoogleRedirectIfAny() {
+    const result = await getRedirectResult(auth);
+    if (!result?.user) return null;
+
+    await attachSession(result.user);
+    return result.user;
+  }
+
   async function loginAndAttachSession(email: string, password: string) {
     const { user } = await signInWithEmailAndPassword(auth, email, password);
     const idToken = await getIdToken(user, true);
     await $fetch("/api/auth/session", { method: "POST", body: { idToken } });
+
+    const { refreshAuth } = useAuthState()
+    await refreshAuth();
+
     return user;
+  }
+
+  async function completeProfile(payload: CompleteProfilePayload) {
+    // user must already have session cookie (after google sign-in)
+    await $fetch("/api/auth/profile", {
+      method: "POST",
+      body: payload,
+    });
+
+    const { refreshAuth } = useAuthState();
+    await refreshAuth();
   }
 
   async function logoutSession() {
     await $fetch("/api/auth/logout", { method: "POST" });
     await auth.signOut();
+
+    const { refreshAuth } = useAuthState();
+    await refreshAuth();
   }
 
   async function fetchCurrentProfile() {
-    const user = auth.currentUser;
-    if (!user) return null;
-    const snap = await getDoc(doc(firestore, "students", user.uid));
-    return snap.exists() ? snap.data() : null;
+    // optional: you can fetch from your own endpoint using cookie instead of firestore client
+    return null;
   }
 
   return {
     registerWithProfile,
     loginAndAttachSession,
+    loginWithGoogleAndAttachSession,
+    completeGoogleRedirectIfAny,
+    completeProfile, // ✅ NEW
     logoutSession,
     fetchCurrentProfile,
   };

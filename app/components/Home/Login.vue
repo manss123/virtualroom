@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full h-full items-start justify-center relative mt-20">
+  <div class="flex w-full h-full items-center justify-center relative">
     <div class="flex flex-col text-white text-[24px] gap-10 items-center">
       <div class="text-center text-[42px]">
         ยินดีต้อนรับสู่ค่าย Engineer Gear Train! <br>
@@ -20,8 +20,8 @@
         กิจกรรมทั้งหมดเน้นการลงมือปฏิบัติจริง ทำงานเป็นทีม และนำความรู้ไปใช้แก้ปัญหาอย่างสร้างสรรค์ <br>
         พร้อมแล้วกดไปหน้าต่อไปเพื่อเริ่มเรียนรู้กันเลย! <br>
       </div>
-      <form class="flex flex-col justify-center items-center w-full gap-6" @submit.prevent="onSubmit">
-        <div class="flex flex-col justify-center items-start">
+      <form class="flex flex-col justify-center items-center w-full gap-6">
+        <!-- <div class="flex flex-col justify-center items-start">
           <div class="text-[24px]">
             อีเมล*
           </div>
@@ -41,15 +41,18 @@
           <div class="text-white text-[24px] mt-10">
             *ข้อมูลที่นักเรียนจำเป็นต้องกรอก
           </div>
-        </div>
+        </div> -->
         <div class="flex flex-col gap-4 w-full items-center justify-start">
-          <button type="submit" class="flex w-fit h-[70px] px-20 bg-[#FFC233] text-black hover:bg-[#B97530] hover:text-white drop-shadow-xl font-medium
-rounded-[15px] items-center justify-center cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-            :disabled="submitting">
-            {{ submitting ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ' }}
+          <button type="button"
+            class="flex w-fit h-[70px] px-20 bg-[#FFC233] text-black hover:bg-[#B97530] hover:text-white drop-shadow-xl font-medium rounded-[15px] items-center justify-center cursor-pointer"
+            @click="onGoogle">
+            เข้าใช้งานด้วย Gmail
           </button>
+
+          <!-- keep email/password button if you want -->
+          <!-- ... -->
+
           <div v-if="error" class="text-red-200 text-[18px]">{{ error }}</div>
-          <div v-if="success" class="text-green-200 text-[18px]">{{ success }}</div>
         </div>
       </form>
       <div class="flex gap-5">
@@ -65,44 +68,42 @@ rounded-[15px] items-center justify-center cursor-pointer disabled:opacity-60 di
   </div>
 </template>
 
-<script lang="ts" setup>
-import { useFirebaseSession } from '~/composables/useAuth'
+<script setup lang="ts">
+import { useFirebaseSession } from "~/composables/useAuth";
 
-const { getImageURL } = useAssetUrl()
-const auth = useAuthView()
-const { loginAndAttachSession } = useFirebaseSession()
+const { loginWithGoogleAndAttachSession, completeGoogleRedirectIfAny } =
+  useFirebaseSession();
 
-const form = reactive({
-  email: '',
-  password: '',
-})
+const { getImageURL } = useAssetUrl();
+const auth = useAuthView();
+const router = useRouter();
+const error = ref("");
 
-const submitting = ref(false)
-const error = ref('')
-const success = ref('')
-const router = useRouter()
-
-const onSubmit = async () => {
-  error.value = ''
-  success.value = ''
-  submitting.value = true
-  try {
-    await loginAndAttachSession(form.email, form.password)
-    await router.push('/pdpa')
-  } catch (err: any) {
-    const code = err?.code as string | undefined
-    if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
-      error.value = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'
-    } else if (code === 'auth/user-not-found') {
-      error.value = 'ไม่พบบัญชีผู้ใช้ในระบบ'
-    } else {
-      error.value = 'ไม่สามารถเข้าสู่ระบบได้ กรุณาลองอีกครั้ง'
-    }
-  } finally {
-    submitting.value = false
-  }
+function bumpHome() {
+  return router.replace({ path: "/", query: { r: Date.now().toString() } });
 }
+
+onMounted(async () => {
+  try {
+    // if redirected back from Google
+    const user = await completeGoogleRedirectIfAny();
+    if (user) await bumpHome();
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+const onGoogle = async () => {
+  error.value = "";
+  try {
+    const user = await loginWithGoogleAndAttachSession();
+    if (user) await bumpHome();
+  } catch (err: any) {
+    error.value = "ไม่สามารถเข้าสู่ระบบด้วย Google ได้ กรุณาลองอีกครั้ง";
+  }
+};
 </script>
+
 
 
 <style></style>

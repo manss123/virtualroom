@@ -1,40 +1,43 @@
 // server/api/auth/me.get.ts
 import { defineEventHandler, getCookie, createError } from "h3";
-import { adminAuth } from "../../utils/firebaseAdmin";
+import { adminAuth, adminDb } from "../../utils/firebaseAdmin";
 import { decodeJwtPayload } from "../../utils/jwt";
 
 const isProd = process.env.NODE_ENV === "production";
 
 export default defineEventHandler(async (event) => {
   const token = getCookie(event, "session");
-
   if (!token) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Unauthenticated",
-    });
+    throw createError({ statusCode: 401, statusMessage: "Unauthenticated" });
   }
 
   try {
     let decoded: any;
 
     if (isProd) {
-      // ✅ โปรดใช้ตรวจ token จริงบน production
-      decoded = await adminAuth.verifyIdToken(token);
+      decoded = await adminAuth.verifySessionCookie(token, true);
     } else {
-      // 🧪 DEV + Emulator → decode แบบง่าย ๆ
       decoded = decodeJwtPayload(token);
     }
 
+    const uid = decoded.uid || decoded.user_id;
+    const email = decoded.email ?? null;
+
+    const studentSnap = await adminDb.collection("students").doc(uid).get();
+    const student = studentSnap.exists ? (studentSnap.data() as any) : null;
+
     return {
-      uid: decoded.uid || decoded.user_id,
-      email: decoded.email ?? null,
+      uid,
+      email,
+      experimentGroup: student?.experimentGroup ?? null,
+      classCode: student?.classCode ?? null,
+      classGroupId: student?.classGroupId ?? null,
+      classGroupName: student?.classGroupName ?? null,
+      firstName: student?.firstName ?? null,
+      lastName: student?.lastName ?? null,
     };
-  } catch (error) {
-    console.error("[/api/auth/me] verify or decode failed:", error);
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Unauthenticated",
-    });
+  } catch (err) {
+    console.error("[/api/auth/me] verify failed:", err);
+    throw createError({ statusCode: 401, statusMessage: "Unauthenticated" });
   }
 });

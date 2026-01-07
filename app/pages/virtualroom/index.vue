@@ -1,40 +1,26 @@
 <template>
   <div class="h-[100vh] w-full overflow-hidden fixed inset-0">
-    <LearningTopBarVue
-      :title="roomTitle"
-      progressMode="room"
-      :roomProgress="roomProgress"
-    />
+    <LearningTopBarVue :title="roomTitle" progressMode="room" :roomProgress="roomProgress" />
 
     <!-- 360 BG -->
     <ClientOnly>
-      <MarzipanoViewer
-        :key="viewerKey"
-        :initial-scene-id="roomKey"
-        :room-key="roomKey"
-        :completed-hotspots="completedHotspots"
-        :show-extra-videos="showExtraVideos"
-        @hotspotClick="handleHotspotClick"
-      />
+      <MarzipanoViewer :key="`${viewerKey}-${showExtraVideos ? 1 : 0}`"
+        :initial-scene-id="LEARNING_ROOMS[roomKey].sceneId" :room-key="roomKey" :completed-hotspots="completedHotspots"
+        :show-extra-videos="showExtraVideos" @hotspotClick="handleHotspotClick" />
     </ClientOnly>
 
-    <div
-      v-if="showVideo && currentVideoId"
-      class="fixed inset-0 z-50 bg-black/85 flex items-center justify-center flex-col"
-    >
+    <div v-if="showVideo && currentVideoId"
+      class="fixed inset-0 z-50 bg-black/85 flex items-center justify-center flex-col">
       <div class="text-white text-lg lg:text-xl 2xl:text-5xl text-center mb-[26px]">
         {{ currentVideoLabel }}
       </div>
-      <div
-        class="bg-black rounded-2xl overflow-hidden w-[90vw] md:max-w-3xl lg:max-w-5xl xl:max-w-7xl aspect-video relative"
-      >
-        <!-- Player container (YT API will inject iframe here) -->
+      <div class="w-[90vw] md:max-w-3xl lg:max-w-5xl xl:max-w-7xl aspect-video rounded-2xl overflow-hidden bg-black">
         <div id="yt-player" class="w-full h-full"></div>
       </div>
+
       <button
         class="z-10 mt-7 font-medium text-[26px] bg-[#FFC233] text-black rounded-nw px-10 py-4 text-sm cursor-pointer hover:bg-[#B97530] hover:text-white transition"
-        @click="closeVideo"
-      >
+        @click="closeVideo">
         ไปต่อได้เลย
       </button>
     </div>
@@ -50,6 +36,7 @@ import type { HotspotDef } from "@/config/virtualScenes";
 import LearningTopBarVue from "~/components/LearningTopBar.vue.vue";
 import { LEARNING_ROOMS, type LearningRoomKey } from "~/config/learningRoom";
 import { VIRTUAL_SCENES } from "@/config/virtualScenes";
+import { QUIZZES } from "~/config/quizzes";
 
 type StudentLevel = "LOW" | "AVERAGE" | "HIGH";
 
@@ -101,6 +88,10 @@ const completedHotspots = computed(
   () => progressData.value?.completedHotspotsByRoom?.[roomKey.value] ?? []
 );
 
+watch(showExtraVideos, () => {
+  viewerKey.value++;
+});
+
 const viewerKey = ref(0);
 
 // video modal state
@@ -108,12 +99,82 @@ const showVideo = ref(false);
 const currentVideoId = ref<string | null>(null);
 const currentVideoHotspotId = ref<string | null>(null);
 
+const router = useRouter();
+
 // YouTube player instance
 const ytPlayer = ref<any | null>(null);
 const ytReady = ref(false);
 const finishedYoutube = ref(false);
 
 const currentVideoLabel = ref<string>(""); // NEW
+
+const { openModal, onModalEvent } = useModal();
+
+let offYoutubeEnded: (() => void) | null = null;
+let offQuizAction: (() => void) | null = null;
+
+onMounted(() => {
+  offQuizAction = onModalEvent("quiz:action", async (p) => {
+    if (p.action === "goHome") {
+      if (p.hotspotId) await markHotspotDone(p.hotspotId);
+      await router.push("/learning");
+      return;
+    }
+
+    if (p.action === "goNext") {
+      if (p.hotspotId) await markHotspotDone(p.hotspotId);
+
+      // ✅ special case: intro2 finished -> reflection gate
+      if (roomKey.value === "intro2") {
+        const reflectionDone = !!progressData.value?.reflection?.submitted;
+        if (!reflectionDone) {
+          await router.push("/reflection");
+        } else {
+          await router.push("/learning");
+        }
+        return;
+      }
+
+      const next = getNextRoomKey(roomKey.value);
+      if (!next) {
+        await router.push("/learning");
+        return;
+      }
+
+      await router.push({ path: "/virtualroom", query: { room: next } });
+      return;
+    }
+  });
+
+
+  offYoutubeEnded = onModalEvent("youtube:ended", async ({ hotspotId }) => {
+    if (!hotspotId) return;
+    await markHotspotDone(hotspotId);
+  });
+});
+
+onBeforeUnmount(() => {
+  offYoutubeEnded?.();
+  offQuizAction?.();
+});
+
+
+const orderedRoomKeys = computed<LearningRoomKey[]>(() => {
+  const lp = (preData.value?.learningPath ?? []) as LearningPathItem[];
+
+  const conceptsInPath = lp
+    .filter((i) => i.action === "EXTRA" || i.action === "REVIEW")
+    .map((i) => i.conceptId) as LearningRoomKey[];
+
+  return ["intro1", ...conceptsInPath, "intro2"];
+});
+
+function getNextRoomKey(current: LearningRoomKey) {
+  const order = orderedRoomKeys.value;
+  const idx = order.indexOf(current);
+  if (idx === -1) return null;
+  return order[idx + 1] ?? null;
+}
 
 function loadYouTubeAPI(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
@@ -146,6 +207,9 @@ async function markHotspotDone(hotspotId: string) {
     });
     const latest = await $fetch<ProgressState>("/api/progress");
     progressData.value = latest;
+
+    await maybeCompleteRoom();
+
     viewerKey.value++;
   } catch (e) {
     console.error("Failed to update hotspot progress:", e);
@@ -168,18 +232,19 @@ async function openVideo(hotspot: HotspotDef) {
   if (!ytPlayer.value) {
     ytPlayer.value = new w.YT.Player("yt-player", {
       videoId: currentVideoId.value,
+      width: "100%",
+      height: "100%",
+      playerVars: { autoplay: 1, rel: 0 },
       events: {
-        onStateChange: (event: any) => {
-          if (
-            event.data === w.YT.PlayerState.ENDED &&
-            currentVideoHotspotId.value
-          ) {
-            markHotspotDone(currentVideoHotspotId.value);
-            finishedYoutube.value = true;
-          }
+        onReady: (e: any) => {
+          const iframe = e.target.getIframe();
+          iframe.style.width = "100%";
+          iframe.style.height = "100%";
+          iframe.style.display = "block";
         },
       },
     });
+
   } else {
     ytPlayer.value.loadVideoById(currentVideoId.value);
   }
@@ -198,18 +263,103 @@ function closeVideo() {
   currentVideoLabel.value = "";
 }
 
+function openDownload(url: string) {
+  // Option A: open in new tab (simple)
+  // window.open(url, "_blank");
+
+  // Option B (true “download”): create <a download>
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+async function handleDocHotspot(hotspot: HotspotDef) {
+  // intro rooms: always single doc
+  const isIntro = hotspot.roomKey === "intro1" || hotspot.roomKey === "intro2";
+
+  // LOW concept rooms: open 2 docs (or more)
+  const isLow = currentConceptLevel.value === "LOW";
+
+  const urls =
+    !isIntro && isLow
+      ? (hotspot.docUrls?.length ? hotspot.docUrls : hotspot.docUrl ? [hotspot.docUrl] : [])
+      : (hotspot.docUrl ? [hotspot.docUrl] : []);
+
+  if (!urls.length) return;
+
+  // Open all docs (2 for LOW)
+  urls.forEach(openDownload);
+
+  // Mark doc step done once (still 1 hotspot)
+  await markHotspotDone(hotspot.id);
+}
+
 async function handleHotspotClick(hotspot: HotspotDef) {
   if (hotspot.type === "video") {
-    await openVideo(hotspot);
-  } else if (hotspot.type === "doc" && hotspot.docUrl) {
-    window.open(hotspot.docUrl, "_blank");
-    await markHotspotDone(hotspot.id);
-  } else if (hotspot.type === "quiz") {
-    // open quiz modal...
-    // when user passes/completes quiz:
-    // await markHotspotDone(hotspot.id);
+    openModal("youtubeVideo", {
+      videoId: hotspot.videoId!,
+      label: hotspot.label,
+      hotspotId: hotspot.id,
+    });
+    return;
   }
+
+  if (hotspot.type === "doc") {
+    await handleDocHotspot(hotspot);
+    return;
+  }
+
+  if (hotspot.type === "quiz") {
+    const quizId = hotspot.roomKey; // ✅ intro1, C1, C2...
+    if (!QUIZZES[quizId]) {
+      console.warn("No quiz config for:", quizId);
+      return;
+    }
+
+    openModal("quiz", {
+      quizId,
+      hotspotId: hotspot.id,
+      roomKey: hotspot.roomKey,
+    });
+  }
+
 }
+
+let offQuizSubmitted: (() => void) | null = null;
+
+onMounted(() => {
+  offQuizSubmitted = onModalEvent("quiz:submitted", async (p) => {
+    // p should include: quizId, roomKey, hotspotId, passed, correct, total, answers
+    await $fetch("/api/progress", {
+      method: "POST",
+      body: {
+        quiz: {
+          quizId: p.quizId,
+          roomKey: p.roomKey,
+          hotspotId: p.hotspotId,
+          passed: p.passed,
+          correct: p.correct,
+          total: p.total,
+          answers: p.answers, // ✅ store all choices
+        },
+      },
+    });
+
+    if (p.passed && p.hotspotId) {
+      await markHotspotDone(p.hotspotId);
+      viewerKey.value++;
+    }
+  });
+
+});
+
+onBeforeUnmount(() => {
+  offQuizSubmitted?.();
+});
+
 
 
 const isIntroRoom = computed(() => {
@@ -238,12 +388,12 @@ const requiredHotspotIds = computed(() => {
 
   return all
     .filter((h) => {
+      if (h.type === "doc") return true;
       if (h.type === "quiz") return true;
-      if (h.type === "video" && h.isExtra && showExtra) return true;
-      // doc in concept rooms: decide if you want it required or optional
-      // if you want required docs too, add:
-      // if (h.type === "doc") return true;
-
+      if (h.type === "video") {
+        if (h.isExtra) return showExtra;
+        return true; // main videos required for everyone
+      }
       return false;
     })
     .map((h) => h.id);
@@ -259,9 +409,40 @@ const roomProgress = computed(() => {
   return { done, total };
 });
 
+async function maybeCompleteRoom() {
+  const required = requiredHotspotIds.value;
+  if (!required.length) return;
+
+  const doneSet = new Set(completedHotspots.value);
+  const allDone = required.every((id) => doneSet.has(id));
+  if (!allDone) return;
+
+  // already completed? do nothing
+  const completedRooms = new Set(progressData.value?.completedRooms ?? []);
+  if (completedRooms.has(roomKey.value)) return;
+
+  await $fetch("/api/progress", {
+    method: "POST",
+    body: { completeRoomKey: roomKey.value },
+  });
+
+  const latest = await $fetch<ProgressState>("/api/progress");
+  progressData.value = latest;
+}
+
+
 onBeforeUnmount(() => {
   if (ytPlayer.value && ytPlayer.value.destroy) {
     ytPlayer.value.destroy();
   }
 });
 </script>
+
+<style>
+/* Force the injected YouTube iframe to match container */
+#yt-player iframe {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+</style>

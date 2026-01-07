@@ -1,30 +1,31 @@
 // plugins/firebase.client.ts
 import { initializeApp, getApps } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getAnalytics } from "firebase/analytics";
+import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 
-export default defineNuxtPlugin((_nuxtApp) => {
-  const config = useRuntimeConfig();
-
-  const firebaseConfig = {
-    apiKey: config.public.firebaseApiKey,
-    authDomain: config.public.firebaseAuthDomain,
-    projectId: config.public.firebaseProjectId,
-    storageBucket: config.public.firebaseStorageBucket,
-    messagingSenderId: config.public.firebaseMessagingSenderId,
-    appId: config.public.firebaseAppId,
-    measurementId: config.public.firebaseMeasurementId,
+export default defineNuxtPlugin(() => {
+  const config = {
+    apiKey: useRuntimeConfig().public.firebaseApiKey,
+    authDomain: useRuntimeConfig().public.firebaseAuthDomain,
+    projectId: useRuntimeConfig().public.firebaseProjectId,
   };
 
-  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+  const app = getApps().length ? getApps()[0] : initializeApp(config);
+
   const auth = getAuth(app);
   const firestore = getFirestore(app);
 
+  // ✅ DEV: connect emulators
+  if (import.meta.dev) {
+    connectAuthEmulator(auth, "http://127.0.0.1:9099", {
+      disableWarnings: true,
+    });
+    connectFirestoreEmulator(firestore, "127.0.0.1", 8080);
+  }
+
   return {
     provide: {
-      firebase: { app: app, auth, firestore, analytics },
+      firebase: { auth, firestore },
     },
   };
 });

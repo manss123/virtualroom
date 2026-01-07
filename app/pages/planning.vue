@@ -23,11 +23,13 @@
 
                 <!-- rows -->
                 <div v-for="room in rooms" :key="room.key" class="grid grid-cols-3 gap-4 items-center py-2">
-                    <div class="flex items-center gap-3 text-left text-[20px]">
+                    <div class="flex items-center gap-3 text-center text-[20px] justify-center">
                         <!-- small color dot -->
                         <span class="w-4 h-4 rounded-full border border-white/60"
                             :class="roomColorClass(room.key)"></span>
                         <span>{{ room.label }}</span>
+
+                        <room-tool-tip :detail="ROOM_DETAILS[room.key as LearningRoomKey]" :is-low="isLowConcept(room.key)" />
                     </div>
 
                     <!-- start date -->
@@ -165,6 +167,8 @@
 
 <script setup lang="ts">
 import { ref, computed, watchEffect } from "vue";
+import type { LearningRoomKey } from "~/config/learningRoom";
+import { ROOM_DETAILS } from "~/config/roomDetails";
 
 // definePageMeta({
 //     middleware: ["auth"],
@@ -215,6 +219,23 @@ const ROOM_COLOR_CLASS: Record<string, string> = {
 function roomColorClass(key: string) {
     return ROOM_COLOR_CLASS[key] ?? "bg-[#FFC233]/40";
 }
+
+type StudentLevel = "LOW" | "AVERAGE" | "HIGH";
+
+const conceptLevelMap = computed<Record<string, StudentLevel>>(() => {
+    const lp = (data.value?.learningPath ?? []) as RawLearningPathItem[];
+    const map: Record<string, StudentLevel> = {};
+    for (const it of lp) {
+        map[it.conceptId] = it.fuzzyLabel;
+    }
+    return map;
+});
+
+function isLowConcept(roomKey: string) {
+    // only C1..C4 can be LOW (intro rooms are never LOW)
+    return conceptLevelMap.value[roomKey] === "LOW";
+}
+
 
 const rooms = ref<RoomPlan[]>([]);
 const errorMessage = ref<string | null>(null);
@@ -438,7 +459,7 @@ async function savePlan() {
             method: "POST",
             body: { planningDone: true },
         });
-        
+
         saveSuccess.value = true;
         router.push("/welcome");
     } catch (err: any) {

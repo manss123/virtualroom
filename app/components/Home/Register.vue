@@ -1,5 +1,5 @@
 <template>
-  <div class="flex w-full items-center justify-center gap-10 overflow-auto">
+  <div class="flex w-full items-center justify-center gap-10 overflow-auto mt-10">
     <div class="flex w-fit h-full items-center justify-end">
       <img class="w-auto h-[750px]" :src="getImageURL('images/cartoons/gear-point.png')" alt="">
     </div>
@@ -10,7 +10,7 @@
           กรอกข้อมูลนักเรียนเพิ่มเติมลงในฟอร์มได้เลยครับ
         </div>
 
-        <div class="flex w-full gap-14">
+        <!-- <div class="flex w-full gap-14">
           <div class="flex flex-col">
             <div class="text-white h-[36px]">อีเมล*</div>
             <input v-model="form.email" class="w-[350px] h-[80px] px-5 bg-[#EFF7F7] rounded-[15px]" type="email"
@@ -21,7 +21,7 @@
             <input v-model="form.password" minlength="6" class="w-[350px] h-[80px] px-5 bg-[#EFF7F7] rounded-[15px]"
               type="password" required />
           </div>
-        </div>
+        </div> -->
 
         <!-- แถว ชื่อ - นามสกุล (เดิม) -->
         <div class="flex w-full gap-14">
@@ -127,49 +127,45 @@
 </template>
 
 <script setup lang="ts">
-import { useFirebaseSession } from '~/composables/useAuth'
+import { useFirebaseSession } from "~/composables/useAuth";
 
-const { getImageURL } = useAssetUrl()
-const auth = useAuthView()
-const router = useRouter()
+const { getImageURL } = useAssetUrl();
+const auth = useAuthView();
+const router = useRouter();
 
-const { registerWithProfile } = useFirebaseSession()
+const { completeProfile } = useFirebaseSession(); // ✅ NEW
 
 const form = reactive({
-  firstName: '',
-  lastName: '',
-  sex: '' as 'ชาย' | 'หญิง' | '',
+  firstName: "",
+  lastName: "",
+  sex: "" as "ชาย" | "หญิง" | "",
   age: undefined as number | undefined,
-  grade: '',
-  school: '',
-  classCode: '',
-  email: '',
-  password: '',
-  pdpa: true
-})
+  grade: "",
+  school: "",
+  classCode: "",
+  pdpa: true,
+});
 
-const submitting = ref(false)
-const error = ref('')
-const success = ref('')
+const submitting = ref(false);
+const error = ref("");
+const success = ref("");
 
-const ages = Array.from({ length: 8 }, (_, i) => i + 11) // ตัวอย่างช่วงอายุ
-const primaryGrades = ['ป.4', 'ป.5', 'ป.6']
-const secondaryGrades = ['ม.1', 'ม.2', 'ม.3', 'ม.4', 'ม.5', 'ม.6']
+const ages = Array.from({ length: 10 }, (_, i) => i + 11);
+const primaryGrades = ["ป.4", "ป.5", "ป.6"];
+const secondaryGrades = ["ม.1", "ม.2", "ม.3", "ม.4", "ม.5", "ม.6"];
 
 const onSubmit = async () => {
-  error.value = ''
-  success.value = ''
+  error.value = "";
+  success.value = "";
 
   if (!form.age) {
-    error.value = 'กรุณาเลือกอายุ'
-    return
+    error.value = "กรุณาเลือกอายุ";
+    return;
   }
 
-  submitting.value = true
+  submitting.value = true;
   try {
-    await registerWithProfile({
-      email: form.email,
-      password: form.password,
+    await completeProfile({
       firstName: form.firstName,
       lastName: form.lastName,
       sex: form.sex,
@@ -177,33 +173,30 @@ const onSubmit = async () => {
       grade: form.grade,
       school: form.school,
       classCode: form.classCode,
-      pdpa: form.pdpa
-    })
+      pdpa: form.pdpa,
+    });
 
-    // สมัคร + login + สร้าง session เสร็จแล้ว
-    success.value = 'สมัครสมาชิกสำเร็จ!'
-    await router.push('/pdpa') // หรือจะให้กลับหน้า Login ก็ได้
+    success.value = "บันทึกข้อมูลสำเร็จ!";
+    await router.push("/pdpa");
   } catch (err: any) {
-    const code = err?.code as string | undefined;
+    const code = err?.data?.data?.code;
 
-    console.log(code)
-
-    if (code === 'classCode/invalid') {
-      error.value = 'รหัสที่ได้รับไม่ถูกต้อง กรุณาตรวจสอบอีกครั้งหรือติดต่อครูผู้สอน';
-    } else if (code === 'classCode/misconfigured') {
-      error.value = 'รหัสนี้ยังตั้งค่าไม่สมบูรณ์ โปรดติดต่อครูผู้สอน';
-    } else if (code === 'auth/email-already-in-use') {
-      error.value = 'อีเมลนี้ถูกใช้สมัครแล้ว';
-    } else if (code === 'auth/weak-password') {
-      error.value = 'รหัสผ่านสั้นเกินไป (อย่างน้อย 6 ตัวอักษร)';
+    if (code === "classCode/invalid") {
+      error.value = "รหัสที่ได้รับไม่ถูกต้อง";
+    } else if (code === "classCode/misconfigured") {
+      error.value = "รหัสนี้ยังตั้งค่าไม่สมบูรณ์";
+    } else if (code === "classCode/immutable") {
+      error.value = "รหัสนี้ถูกยืนยันแล้ว ไม่สามารถเปลี่ยนได้";
+    } else if (err?.statusCode === 401) {
+      error.value = "กรุณาเข้าสู่ระบบด้วย Google ก่อน";
+      auth.setPage("Login");
     } else {
-      error.value = 'ไม่สามารถสมัครสมาชิกได้ กรุณาลองใหม่อีกครั้ง';
+      error.value = "ไม่สามารถบันทึกข้อมูลได้";
     }
+  } finally {
+    submitting.value = false;
   }
-  finally {
-    submitting.value = false
-  }
-}
+};
 </script>
 
 

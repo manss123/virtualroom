@@ -1,8 +1,7 @@
-// middleware/auth.ts (route middleware)
-export default defineNuxtRouteMiddleware(async (_to, _from) => {
+export default defineNuxtRouteMiddleware(async () => {
   try {
     await $fetch("/api/auth/me");
   } catch {
-    return navigateTo("/"); // หรือหน้า Login
+    return navigateTo("/");
   }
 });

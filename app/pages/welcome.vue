@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full h-[calc(100vh-70px)] flex items-start justify-center" :style="{ backgroundImage: `url(${bg})`, backgroundSize: 'cover' }">
+  <div class="w-full 3xl:h-[calc(100vh-70px)] flex items-start justify-center" :style="{ backgroundImage: `url(${bg})`, backgroundSize: 'cover' }">
     <div class="max-w-10/12 flex w-full flex-col items-center">
       <div class="flex flex-col items-center justify-center w-full max-w-5xl mt-[106px]">
         <div class="text-[#FFC233] font-semibold text-5xl">

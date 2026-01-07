@@ -21,10 +21,11 @@ export default defineEventHandler(async (event) => {
   let decoded: any;
   try {
     decoded = isProd
-      ? await adminAuth.verifyIdToken(token)
-      : decodeJwtPayload(token);
+  ? await adminAuth.verifySessionCookie(token, true)
+  : decodeJwtPayload(token);
+
   } catch (error) {
-    console.error("[POST /api/learning-plan] verifyIdToken failed:", error);
+    console.error("[POST /api/learning-plan] verifySessionCookie failed:", error);
     throw createError({ statusCode: 401, statusMessage: "Unauthenticated" });
   }
 

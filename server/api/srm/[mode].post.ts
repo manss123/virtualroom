@@ -24,18 +24,14 @@ export default defineEventHandler(async (event) => {
 
   let decoded: any;
   try {
-    if (isProd) {
-      decoded = await adminAuth.verifyIdToken(token);
-    } else {
-      decoded = decodeJwtPayload(token);
-    }
+    decoded = isProd
+      ? await adminAuth.verifySessionCookie(token, true)
+      : decodeJwtPayload(token);
   } catch (error) {
-    console.error("[POST /api/srm/[mode]] verify/decode failed:", error);
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Unauthenticated",
-    });
+    console.error("[POST /api/srm/[mode]] verifySessionCookie failed:", error);
+    throw createError({ statusCode: 401, statusMessage: "Unauthenticated" });
   }
+
 
   const uid = decoded.uid || decoded.user_id;
 

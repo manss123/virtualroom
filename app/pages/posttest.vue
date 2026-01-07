@@ -1,0 +1,8 @@
+<template>
+  <TestRunner mode="post" />
+</template>
+
+<script setup>
+import TestRunner from "~/components/Tests/TestRunner.vue";
+// definePageMeta({ middleware: ["auth"] });
+</script>

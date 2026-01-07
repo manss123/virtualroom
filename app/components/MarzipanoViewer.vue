@@ -68,7 +68,7 @@ onMounted(async () => {
     const hotspotContainer = scene.hotspotContainer();
 
     const completed = new Set(props.completedHotspots ?? []);
-    const showExtra = props.showExtraVideos ?? true;
+    const showExtra = props.showExtraVideos ?? false;
     // ------- PERSONALIZED FILTERING -------
     // hide extra videos if showExtra is false
     const visibleHotspots = def.hotspots.filter((h) => {
@@ -76,21 +76,30 @@ onMounted(async () => {
       return true;
     });
 
+
     type HState = "done" | "current" | "locked" | "active";
 
 
     const isIntro = def.roomKey === "intro1" || def.roomKey === "intro2";
 
-    // which hotspots are in the linear flow?
     const isLinearStep = (h: HotspotDef) => {
-      if (isIntro)
+      if (isIntro) {
         return h.type === "doc" || h.type === "video" || h.type === "quiz";
+      }
 
-      // concept rooms: keep your personalized rule
+      // ✅ concept rooms: doc -> main videos -> (extra if LOW) -> quiz
+      if (h.type === "doc") return true;
+
+      if (h.type === "video") {
+        if (h.isExtra) return showExtra; // extra only for LOW
+        return true;                     // main videos always part of flow
+      }
+
       if (h.type === "quiz") return true;
-      if (h.type === "video" && h.isExtra && showExtra) return true;
+
       return false;
     };
+
 
     // ✅ steps in order
     const stepHotspots = visibleHotspots
@@ -130,20 +139,34 @@ onMounted(async () => {
       inner.className = "mz-hotspot-inner";
       wrapper.appendChild(inner);
 
-      // 1) CUSTOM HTML (robot card) – unchanged
-      if (h.html && h.type === "doc") {
+      // 1) CUSTOM HTML (any type that provides html)
+      if (h.html) {
         inner.innerHTML = h.html;
 
-        const clickTarget =
-          (inner.querySelector("[data-hotspot-click]") as HTMLElement) ?? inner;
+        // Prefer explicit click target(s)
+        const clickTargets = Array.from(
+          inner.querySelectorAll("[data-hotspot-click]")
+        ) as HTMLElement[];
+
+        // Fallback: if no data-hotspot-click, make whole card clickable
+        const targets = clickTargets.length ? clickTargets : [inner];
 
         if (state !== "locked") {
-          clickTarget.addEventListener("click", () => {
-            emit("hotspotClick", h); // ✅ parent will open + mark
+          targets.forEach((t) => {
+            t.style.pointerEvents = "auto";
+            t.addEventListener("click", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              emit("hotspotClick", h);
+            });
           });
         } else {
-          clickTarget.style.pointerEvents = "none";
-          clickTarget.style.opacity = "0.5";
+          // lock: disable clicking + dim
+          targets.forEach((t) => {
+            t.style.pointerEvents = "none";
+            t.style.opacity = "0.5";
+            t.style.filter = "grayscale(0.6)";
+          });
         }
 
         hotspotContainer.createHotspot(
@@ -246,6 +269,9 @@ onMounted(async () => {
 
   if (DEBUG_PLACEMENT && el.value) {
     el.value.addEventListener("click", (ev: MouseEvent) => {
+      // ignore hotspot clicks
+      const target = ev.target as HTMLElement | null;
+      if (target?.closest?.(".mz-hotspot")) return;
       if (!currentSceneId) return;
       const entry = scenes.get(currentSceneId);
       if (!entry) return;
@@ -287,7 +313,7 @@ function getIconSrc(h: HotspotDef, state: "active" | "done" | "locked") {
   if (state === "done" && h.iconDone) return h.iconDone;
   if (state === "locked" && h.iconLocked) return h.iconLocked;
   if (h.icon) return h.icon;
-  return DEFAULT_ICONS[h.type] || "/hotspots/default.png";
+  return h.iconLocked || h.icon;
 }
 
 // if route query changes (room=...), switch scene
@@ -526,7 +552,7 @@ watch(
   height: 420px;
   border-radius: 12px;
   overflow: visible;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
   cursor: pointer;
 }
 
@@ -550,14 +576,25 @@ watch(
   align-items: center;
   justify-content: center;
 
-  box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 
-.mz-tv-badge[data-state="done"] { background: #22c55e; }
-.mz-tv-badge[data-state="current"] { background: #FFC233; }
-.mz-tv-badge[data-state="locked"] { background: #9ca3af; }
-.mz-tv-badge[data-state="active"] { background: #FFC233; }
+.mz-tv-badge[data-state="done"] {
+  background: #22c55e;
+}
+
+.mz-tv-badge[data-state="current"] {
+  background: #FFC233;
+}
+
+.mz-tv-badge[data-state="locked"] {
+  background: #9ca3af;
+}
+
+.mz-tv-badge[data-state="active"] {
+  background: #FFC233;
+}
 
 .mz-tv-badge-icon {
   color: #111;
@@ -574,9 +611,47 @@ watch(
   justify-content: center;
   font-size: 56px;
   color: white;
-  text-shadow: 0 0 10px rgba(0,0,0,0.7);
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
   /* background: radial-gradient(circle, rgba(0,0,0,0) 35%, rgba(0,0,0,0.45) 100%); */
   pointer-events: none;
 }
 
+.hotspot-quiz-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hotspot-quiz-btn {
+  width: 350px;
+  height: 80px;
+  background: #FFC233;
+  border: 0;
+  border-radius: 18px;
+  /* match your rounded-nw look */
+  font-size: 26px;
+  font-weight: 600;
+  color: #000;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.hotspot-extra-quiz-btn {
+  width: 350px;
+  height: 80px;
+  background: #6C381F;
+  border: 0;
+  border-radius: 18px;
+  /* match your rounded-nw look */
+  font-size: 26px;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.hotspot-quiz-btn:hover {
+  background: #B97530;
+  color: #fff;
+}
 </style>

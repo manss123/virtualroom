@@ -3,6 +3,7 @@ import { defineEventHandler, readBody, getCookie, createError } from "h3";
 import { adminAuth, adminDb } from "../../utils/firebaseAdmin";
 import { decodeJwtPayload } from "../../utils/jwt";
 import { evaluateTest, type TestAnswers } from "../../utils/evaluateTest";
+import { FieldValue } from "firebase-admin/firestore";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -22,18 +23,14 @@ export default defineEventHandler(async (event) => {
 
   let decoded: any;
   try {
-    if (isProd) {
-      decoded = await adminAuth.verifyIdToken(token);
-    } else {
-      decoded = decodeJwtPayload(token);
-    }
+    decoded = isProd
+      ? await adminAuth.verifySessionCookie(token, true)
+      : decodeJwtPayload(token);
   } catch (error) {
-    console.error("[POST /api/tests/[mode]] verifyIdToken failed:", error);
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Unauthenticated",
-    });
+    console.error("[POST /api/tests/[mode]] verifySessionCookie failed:", error);
+    throw createError({ statusCode: 401, statusMessage: "Unauthenticated" });
   }
+
 
   const uid = decoded.uid || decoded.user_id;
 
@@ -81,11 +78,10 @@ export default defineEventHandler(async (event) => {
     .collection("tests")
     .doc(mode)
     .set({
-      ...result, // includes details & fuzzy stuff
-      createdAt: new Date(),
+      ...result,
+      createdAt: FieldValue.serverTimestamp(),
     });
 
-  // You can return the full result if you want to show it immediately
   return {
     ok: true,
     result,

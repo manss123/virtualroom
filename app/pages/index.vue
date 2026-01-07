@@ -1,74 +1,78 @@
+<!-- pages/index.vue -->
 <template>
   <component :is="currentComponent" />
 </template>
 
-<script lang="ts" setup>
-import { computed, onMounted } from 'vue';
-import Login from '~/components/Home/Login.vue';
-import Register from '~/components/Home/Register.vue';
+<script setup lang="ts">
+import { computed, onMounted, watch } from "vue";
+import Login from "~/components/Home/Login.vue";
+import Register from "~/components/Home/Register.vue";
+import type { ProgressState } from "~/types/progress";
 
-definePageMeta({ middleware: ['guest'] })
+definePageMeta({ middleware: ["guest"] });
 
-const pages = {
-  Login,
-  Register,
-}
-
-const { currentPage } = provideAuthView('Login')
-const currentComponent = computed(() => pages[currentPage.value])
-
+const pages = { Login, Register };
+const auth = provideAuthView("Login");
+const currentComponent = computed(() => pages[auth.currentPage.value]);
 
 const router = useRouter();
+const route = useRoute();
 
-interface ProgressState {
-  preTestDone: boolean;
-  pdpaDone: boolean;
-  questionnaireDone: boolean;
-  planningDone: boolean;
-  completedRooms: string[];
-  completedHotspotsByRoom?: Record<
-    string,                              // roomKey e.g. "C2"
-    string[]                             // hotspot ids in that room
-  >;
+type MeResponse = {
+  uid: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  classCode: string | null;
+};
+
+function redirectByProgress(p: ProgressState) {
+  if (!p.pdpaDone) return router.replace("/pdpa");
+  if (!p.preTestDone) return router.replace("/notice");
+  if (!p.questionnaireDone) return router.replace("/srm");
+  if (!p.planningDone) return router.replace("/fuzzy-result");
+
+  const reflectionDone = !!p.reflection?.submitted;
+  const postDone = !!p.postTestDone;
+
+  if (!reflectionDone) return router.replace("/reflection");
+  if (!postDone) return router.replace("/learning");
+
+  return router.replace("/dashboard");
 }
 
-const { data, error } = await useFetch("/api/progress", {
-  method: "GET",
-});
-
-onMounted(() => {
-  // If progress API failed (likely 401 unauthenticated),
-  // just stay on this page (Login / Register).
-  if (error.value) {
+async function gate() {
+  // 1) Check session
+  let me: MeResponse | null = null;
+  try {
+    me = await $fetch<MeResponse>("/api/auth/me", { method: "GET" });
+  } catch {
+    // unauthenticated
+    auth.setPage("Login");
     return;
   }
 
-  const p = (data.value || {}) as ProgressState;
-
-  if (!p.pdpaDone) {
-    router.replace("/pdpa");
-    return;
-  }
-  
-  if (!p.preTestDone) {
-    router.replace("/notice");
-    return;
-  }
-  if (!p.questionnaireDone) {
-    router.replace("/srm");
+  // 2) Missing student doc -> show Register
+  const missingProfile = !me?.firstName;
+  if (missingProfile) {
+    auth.setPage("Register");
     return;
   }
 
-
-  if (!p.planningDone) {
-    router.replace("/fuzzy-result");
-    return;
+  // 3) Have profile -> redirect by progress
+  try {
+    const p = await $fetch<ProgressState>("/api/progress", { method: "GET" });
+    redirectByProgress(p);
+  } catch {
+    // keep page as-is if needed
   }
+}
 
-  router.replace("/welcome");
-});
+onMounted(gate);
 
-
+// ✅ Important: rerun gate whenever route changes (e.g., after login we bump query)
+watch(
+  () => route.fullPath,
+  () => gate()
+);
 </script>
-
-<style></style>

@@ -315,7 +315,7 @@ const submitAll = async () => {
         alert('บันทึกผลแบบประเมิน SRM เรียบร้อยแล้ว');
         // ตัวอย่าง: ไปหน้าต่อไป
         const router = useRouter();
-        await router.push('/fuzzy-result');
+        await router.push("/fuzzy-result?mode=pre" );
     } catch (err) {
         console.error('❌ submit SRM failed:', err);
         alert('บันทึกผลแบบประเมินไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');

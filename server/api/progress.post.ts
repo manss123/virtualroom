@@ -9,13 +9,28 @@ const isProd = process.env.NODE_ENV === "production";
 
 interface ProgressBody {
   preTestDone?: boolean;
+  postTestDone?: boolean;
   pdpaDone?: boolean;
   questionnaireDone?: boolean;
   planningDone?: boolean;
+
   completeRoomKey?: string;
   completeHotspotId?: string;
   roomKey?: string;
+
+  quiz?: {
+    quizId: string;
+    roomKey: string;
+    hotspotId?: string;
+
+    passed: boolean;
+    correct: number;
+    total: number;
+
+    answers: Record<string, string>;
+  };
 }
+
 
 export default defineEventHandler(async (event) => {
   const token = getCookie(event, "session");
@@ -26,10 +41,11 @@ export default defineEventHandler(async (event) => {
   let decoded: any;
   try {
     decoded = isProd
-      ? await adminAuth.verifyIdToken(token)
-      : decodeJwtPayload(token);
+  ? await adminAuth.verifySessionCookie(token, true)
+  : decodeJwtPayload(token);
+
   } catch (err) {
-    console.error("[POST /api/progress] verifyIdToken failed:", err);
+    console.error("[POST /api/progress] verifySessionCookie failed:", err);
     throw createError({ statusCode: 401, statusMessage: "Unauthenticated" });
   }
 
@@ -42,13 +58,16 @@ export default defineEventHandler(async (event) => {
     .collection("progress")
     .doc("gear-train");
 
-  const update: Partial<ProgressState> & { updatedAt: Date } = {
-    updatedAt: new Date(),
+  const update: any = {
+    updatedAt: FieldValue.serverTimestamp(),
   };
 
   // --- simple flags ---
   if (typeof body.preTestDone === "boolean") {
     update.preTestDone = body.preTestDone;
+  }
+  if (typeof body.postTestDone === "boolean") {
+    update.postTestDone = body.postTestDone;
   }
   if (typeof body.pdpaDone === "boolean") {
     update.pdpaDone = body.pdpaDone;
@@ -77,6 +96,49 @@ export default defineEventHandler(async (event) => {
 
     map[body.roomKey] = Array.from(list);
     update.completedHotspotsByRoom = map;
+  }
+
+    // --- quiz submission ---
+    if (body.quiz?.quizId && body.quiz?.roomKey) {
+    const snap = await ref.get();
+    const data = (snap.data() || {}) as ProgressState;
+
+    const attempt = {
+      quizId: body.quiz.quizId,
+      roomKey: body.quiz.roomKey,
+      hotspotId: body.quiz.hotspotId ?? null,
+
+      passed: body.quiz.passed,
+      correct: body.quiz.correct,
+      total: body.quiz.total,
+      answers: body.quiz.answers || {},
+
+      submittedAt: FieldValue.serverTimestamp(),
+    };
+
+    // ✅ write as a document (serverTimestamp is allowed here)
+    await ref.collection("quizAttempts").add(attempt);
+
+    // ✅ store last result in main progress doc (no serverTimestamp inside array)
+    update.lastQuizResultByRoom = {
+      ...(data.lastQuizResultByRoom || {}),
+      [body.quiz.roomKey]: {
+        ...attempt,
+        // store a placeholder or omit; we can read submittedAt from subcollection
+        submittedAt: new Date(), // or omit this field
+      },
+    };
+
+    // ✅ room finished timestamp (allowed, not in array)
+    if (body.quiz.passed) {
+      const finishedMap = data.roomFinishedAt || {};
+      if (!finishedMap[body.quiz.roomKey]) {
+        update.roomFinishedAt = {
+          ...finishedMap,
+          [body.quiz.roomKey]: FieldValue.serverTimestamp(),
+        };
+      }
+    }
   }
 
   await ref.set(update, { merge: true });
