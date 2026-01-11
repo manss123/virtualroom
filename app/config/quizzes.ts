@@ -95,7 +95,7 @@ export const QUIZZES: Record<string, QuizDef> = {
         id: "q2",
         question: "จากข้อที่ 1 หาก เฟือง A 20 หมุนไป ทั้งหมด 10 รอบ จะทำให้เฟือง A 40 หมุนไปทั้งหมดกี่รอบ",
         options: [
-          { value: "a", text: "ก. หมุนไป 10 รอบ เช่นกัน" },
+          { value: "a", text: "ก. หมุนไป 20 รอบ เช่นกัน" },
           { value: "b", text: "ข. หมุน มากกว่า 10 รอบ" },
           { value: "c", text: "ค. หมุนอยู่ระหว่าง 5-10 รอบ" },
           { value: "d", text: "ง. หมุนไป 5 รอบ" },

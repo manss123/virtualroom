@@ -1,126 +1,95 @@
 <template>
-  <div class="min-h-screen text-white px-8 py-10">
-    <!-- Title -->
-    <h1 class="text-4xl font-semibold text-[#FFC233] text-center">Student Dashboard</h1>
-    <div class="mt-6 h-px bg-white/20"></div>
+  <div class="w-full flex justify-center">
+    <div class="min-h-screen text-white px-8 py-10 max-w-7xl">
+      <!-- Title -->
+      <h1 class="text-4xl font-semibold text-[#FFC233] text-center">Student Dashboard</h1>
+      <div class="mt-6 h-px bg-white/20"></div>
 
-    <!-- 1) SUMMARY CARDS -->
-    <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCardVue label="จำนวนนักเรียนทั้งหมดในระบบ" :value="summary.totalStudents" />
-      <StatCardVue label="จำนวนนักเรียนที่ทำ Pretest" :value="summary.pretestDone" />
-      <StatCardVue label="จำนวนนักเรียนกำลังเรียน Virtual" :value="summary.learningNow" />
-      <StatCardVue label="จำนวนนักเรียนที่ทำ Posttest" :value="summary.posttestDone" />
-    </div>
-
-    <!-- Export buttons -->
-    <div class="mt-10 flex gap-4 justify-end items-center">
-      <button
-        class="flex items-center gap-2 text-[#FFC233] hover:underline"
-        @click="exportAllXlsx"
-      >
-        ⬇ ดาวน์โหลดทั้งหมด (Excel)
-      </button>
-
-      <button
-        class="flex items-center gap-2 text-[#FFC233] hover:underline"
-        @click="exportAllCsvZipLike"
-      >
-        ⬇ ดาวน์โหลดทั้งหมด (CSV UTF-8)
-      </button>
-    </div>
-
-    <!-- 2) STUDENT PROFILE TABLE -->
-    <SectionBlockVue
-      title="ตารางแสดงข้อมูลโปรไฟล์นักเรียน"
-      :download="() => exportOneXlsx('students_profile', profileRows)"
-    >
-      <div class="overflow-x-auto">
-        <table class="w-full border-separate border-spacing-y-3">
-          <thead>
-            <tr class="text-center text-sm">
-              <ThPillVue class="rounded-l-xl">No.</ThPillVue>
-              <ThPillVue>First Name</ThPillVue>
-              <ThPillVue>Last Name</ThPillVue>
-              <ThPillVue>Gender</ThPillVue>
-              <ThPillVue>Age</ThPillVue>
-              <ThPillVue>School Name</ThPillVue>
-              <ThPillVue>Code</ThPillVue>
-              <ThPillVue class="rounded-r-xl">Group</ThPillVue>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr
-              v-for="(s, idx) in profileRows"
-              :key="s.uid"
-              class="text-center cursor-pointer"
-              @click="goStudent(s.uid)"
-            >
-              <TdPillVue class="rounded-l-xl">{{ idx + 1 }}</TdPillVue>
-              <TdPillVue>{{ s.firstName }}</TdPillVue>
-              <TdPillVue>{{ s.lastName }}</TdPillVue>
-              <TdPillVue>{{ s.sex }}</TdPillVue>
-              <TdPillVue>{{ s.age }}</TdPillVue>
-              <TdPillVue>{{ s.school }}</TdPillVue>
-              <TdPillVue>{{ s.classCode }}</TdPillVue>
-              <TdPillVue class="rounded-r-xl">{{ s.experimentGroup }}</TdPillVue>
-            </tr>
-          </tbody>
-        </table>
+      <!-- 1) SUMMARY CARDS -->
+      <div class="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCardVue label="จำนวนนักเรียนทั้งหมดในระบบ" :value="summary.totalStudents" />
+        <StatCardVue label="จำนวนนักเรียนที่ทำ Pretest" :value="summary.pretestDone" />
+        <StatCardVue label="จำนวนนักเรียนกำลังเรียน Virtual" :value="summary.learningNow" />
+        <StatCardVue label="จำนวนนักเรียนที่ทำ Posttest" :value="summary.posttestDone" />
       </div>
-    </SectionBlockVue>
 
-    <!-- 3) RAW PRE/POST ANSWERS TABLE -->
-    <SectionBlockVue
-      title="ตารางแสดงคำตอบแบบทดสอบก่อน-หลังเรียนของนักเรียน"
-      note="* คลิกที่ชื่อแถวเพื่อดูข้อมูลรายบุคคลได้"
-      :download="() => exportOneXlsx('raw_pre_post', prePostRows)"
-    >
-      <DynamicTableVue
-        :rows="prePostRows"
-        :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
-        @rowClick="(r) => goStudent(r.uid)"
-      />
-    </SectionBlockVue>
+      <!-- Export buttons -->
+      <div class="mt-10 flex gap-4 justify-end items-center">
+        <button class="flex items-center gap-2 text-[#FFC233] hover:underline" @click="exportAllXlsx">
+          ⬇ ดาวน์โหลดทั้งหมด (Excel)
+        </button>
 
-    <!-- 4) SRM QUESTIONNAIRE TABLE -->
-    <SectionBlockVue
-      title="ตารางแสดงระดับความคิดเห็นของนักเรียนผ่านแบบประเมินการรู้คิดและการควบคุมการรู้คิด"
-      :download="() => exportOneXlsx('srm', srmRows)"
-    >
-      <DynamicTableVue
-        :rows="srmRows"
-        :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
-        @rowClick="(r) => goStudent(r.uid)"
-      />
-    </SectionBlockVue>
+        <button class="flex items-center gap-2 text-[#FFC233] hover:underline" @click="exportAllCsvZipLike">
+          ⬇ ดาวน์โหลดทั้งหมด (CSV UTF-8)
+        </button>
+      </div>
 
-    <!-- 5) LEARNING PLAN TABLE -->
-    <SectionBlockVue
-      title="ตารางแสดงแผนการเรียน (ตารางเรียน) ของนักเรียน"
-      :download="() => exportOneXlsx('learning_plan', planRows)"
-    >
-      <DynamicTableVue
-        :rows="planRows"
-        :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
-        @rowClick="(r) => goStudent(r.uid)"
-      />
-    </SectionBlockVue>
+      <!-- 2) STUDENT PROFILE TABLE -->
+      <SectionBlockVue title="ตารางแสดงข้อมูลโปรไฟล์นักเรียน"
+        :download="() => exportOneXlsx('students_profile', profileRows)">
+        <div class="overflow-x-auto">
+          <table class="w-full border-separate border-spacing-y-3">
+            <thead>
+              <tr class="text-center text-sm">
+                <ThPillVue class="rounded-l-xl">No.</ThPillVue>
+                <ThPillVue>First Name</ThPillVue>
+                <ThPillVue>Last Name</ThPillVue>
+                <ThPillVue>Gender</ThPillVue>
+                <ThPillVue>Age</ThPillVue>
+                <ThPillVue>School Name</ThPillVue>
+                <ThPillVue>Code</ThPillVue>
+                <ThPillVue class="rounded-r-xl">Group</ThPillVue>
+              </tr>
+            </thead>
 
-    <!-- 6) PLANNED DATE STATUS TABLE -->
-    <SectionBlockVue
-      title="ตารางแสดงสถานะผลการกำหนดเวลาเรียนและข้อความ Reflection ของนักเรียน"
-      :download="() => exportOneXlsx('planned_status', statusRows)"
-    >
-      <DynamicTableVue
-        :rows="statusRows"
-        :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
-        @rowClick="(r) => goStudent(r.uid)"
-      />
-    </SectionBlockVue>
+            <tbody>
+              <tr v-for="(s, idx) in profileRows" :key="s.uid" class="text-center cursor-pointer"
+                @click="goStudent(s.uid)">
+                <TdPillVue class="rounded-l-xl">{{ idx + 1 }}</TdPillVue>
+                <TdPillVue>{{ s.firstName }}</TdPillVue>
+                <TdPillVue>{{ s.lastName }}</TdPillVue>
+                <TdPillVue>{{ s.sex }}</TdPillVue>
+                <TdPillVue>{{ s.age }}</TdPillVue>
+                <TdPillVue>{{ s.school }}</TdPillVue>
+                <TdPillVue>{{ s.classCode }}</TdPillVue>
+                <TdPillVue class="rounded-r-xl">{{ s.experimentGroup }}</TdPillVue>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </SectionBlockVue>
 
-    <div v-if="pending" class="mt-6 opacity-80">Loading...</div>
-    <div v-if="err" class="mt-6 text-red-300">Load failed</div>
+      <!-- 3) RAW PRE/POST ANSWERS TABLE -->
+      <SectionBlockVue title="ตารางแสดงคำตอบแบบทดสอบก่อน-หลังเรียนของนักเรียน"
+        note="* คลิกที่ชื่อแถวเพื่อดูข้อมูลรายบุคคลได้" :download="() => exportOneXlsx('raw_pre_post', prePostRows)">
+        <DynamicTableVue :rows="prePostRows" :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
+          @rowClick="(r) => goStudent(r.uid)" />
+      </SectionBlockVue>
+
+      <!-- 4) SRM QUESTIONNAIRE TABLE -->
+      <SectionBlockVue title="ตารางแสดงระดับความคิดเห็นของนักเรียนผ่านแบบประเมินการรู้คิดและการควบคุมการรู้คิด"
+        :download="() => exportOneXlsx('srm', srmRows)">
+        <DynamicTableVue :rows="srmRows" :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
+          @rowClick="(r) => goStudent(r.uid)" />
+      </SectionBlockVue>
+
+      <!-- 5) LEARNING PLAN TABLE -->
+      <SectionBlockVue title="ตารางแสดงแผนการเรียน (ตารางเรียน) ของนักเรียน"
+        :download="() => exportOneXlsx('learning_plan', planRows)">
+        <DynamicTableVue :rows="planRows" :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
+          @rowClick="(r) => goStudent(r.uid)" />
+      </SectionBlockVue>
+
+      <!-- 6) PLANNED DATE STATUS TABLE -->
+      <SectionBlockVue title="ตารางแสดงสถานะผลการกำหนดเวลาเรียนและข้อความ Reflection ของนักเรียน"
+        :download="() => exportOneXlsx('planned_status', statusRows)">
+        <DynamicTableVue :rows="statusRows" :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
+          @rowClick="(r) => goStudent(r.uid)" />
+      </SectionBlockVue>
+
+      <div v-if="pending" class="mt-6 opacity-80">Loading...</div>
+      <div v-if="err" class="mt-6 text-red-300">Load failed</div>
+    </div>
   </div>
 </template>
 
@@ -153,7 +122,10 @@ type ProfileRow = {
 // For DynamicTable rows: must include uid + display columns
 type AnyRow = Record<string, any> & { uid: string };
 
+definePageMeta({ middleware: ["auth", "teacher"] });
+
 const router = useRouter();
+
 
 // ✅ Recommended: ONE endpoint that returns everything for this dashboard
 const { data, pending, error: err } = await useFetch<{

@@ -55,12 +55,12 @@
           <div v-if="error" class="text-red-200 text-[18px]">{{ error }}</div>
         </div>
       </form>
-      <div class="flex gap-5">
+      <!-- <div class="flex gap-5">
         <div> ยังไม่มีบัญชี? </div>
         <button class="underline cursor-pointer" type="button" @click="auth.setPage('Register')">
           สมัครเปิดบัญชี
         </button>
-      </div>
+      </div> -->
     </div>
     <div class="absolute -bottom-50 hidden 3xl:flex">
       <img class="w-[840px] h-[610px]" :src="getImageURL('images/cartoons/gear-greet.png')" alt="">

@@ -1,45 +1,88 @@
-import { defineEventHandler, createError } from "h3";
-import { adminDb } from "../../../utils/firebaseAdmin";
+import { defineEventHandler, getCookie, createError } from "h3";
+import { adminAuth, adminDb } from "../../../utils/firebaseAdmin";
+import { decodeJwtPayload } from "../../../utils/jwt";
+
+const isProd = process.env.NODE_ENV === "production";
+
+function tsToISO(v: any): string | null {
+  if (!v) return null;
+  if (typeof v?.toDate === "function") return v.toDate().toISOString();
+  if (typeof v?._seconds === "number") return new Date(v._seconds * 1000).toISOString();
+  const d = new Date(v);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
 
 export default defineEventHandler(async (event) => {
-  // TODO: verify teacher session/role
+  // ✅ (recommended) protect teacher routes
+  const token = getCookie(event, "session");
+  if (!token) throw createError({ statusCode: 401, statusMessage: "Unauthenticated" });
+
+  try {
+    if (isProd) await adminAuth.verifySessionCookie(token, true);
+    else decodeJwtPayload(token);
+  } catch {
+    throw createError({ statusCode: 401, statusMessage: "Unauthenticated" });
+  }
+
   const uid = event.context.params?.uid;
-  if (!uid) throw createError({ statusCode: 400, statusMessage: "uid required" });
+  if (!uid) throw createError({ statusCode: 400, statusMessage: "Missing uid" });
 
-  // 1) student profile
   const studentRef = adminDb.collection("students").doc(uid);
-  const studentSnap = await studentRef.get();
-  if (!studentSnap.exists) throw createError({ statusCode: 404, statusMessage: "Student not found" });
+  const progressRef = studentRef.collection("progress").doc("gear-train");
+  const planRef = studentRef.collection("plans").doc("gear-train");
+  const srmPreRef = studentRef.collection("srm").doc("pre");
 
-  const student = studentSnap.data() as any;
+  const [studentSnap, progressSnap, planSnap, srmSnap] = await Promise.all([
+    studentRef.get(),
+    progressRef.get(),
+    planRef.get(),
+    srmPreRef.get(),
+  ]);
 
-  // 2) progress (if you store it by uid)
-  const progressSnap = await adminDb.collection("progress").doc(uid).get();
-  const progress = progressSnap.exists ? (progressSnap.data() as any) : null;
+  if (!studentSnap.exists) {
+    throw createError({ statusCode: 404, statusMessage: "Student not found" });
+  }
 
-  // 3) example: quizzes (if you store under progress or another collection)
-  // adjust to your real schema
-  const quizSnap = await adminDb.collection("quizResults").doc(uid).get();
-  const quizResults = quizSnap.exists ? (quizSnap.data() as any) : null;
+  const s = studentSnap.data() as any;
+  const progress = (progressSnap.exists ? progressSnap.data() : {}) as any;
+  const plan = (planSnap.exists ? planSnap.data() : {}) as any;
+  const srmPre = (srmSnap.exists ? srmSnap.data() : null) as any | null;
 
-  // 4) example: pre/post answers
-  const preSnap = await adminDb.collection("tests").doc(uid).collection("pre").get();
-  const preAnswers = preSnap.docs.map(d => ({ id: d.id, ...(d.data() as any) }));
+  // normalize roomFinishedAt
+  const roomFinishedAt: Record<string, string> = {};
+  for (const [k, v] of Object.entries(progress?.roomFinishedAt || {})) {
+    const iso = tsToISO(v);
+    if (iso) roomFinishedAt[k] = iso;
+  }
+
+  // normalize plan rooms
+  const rooms = Array.isArray(plan?.rooms) ? plan.rooms : [];
+  const planRooms = rooms
+    .map((r: any) => ({
+      roomKey: r.roomKey ?? r.key ?? r.conceptId ?? r.room ?? null,
+      startDate: tsToISO(r.startDate),
+      endDate: tsToISO(r.endDate),
+    }))
+    .filter((r: any) => !!r.roomKey);
 
   return {
-    uid,
-    student: {
-      firstName: student.firstName ?? "",
-      lastName: student.lastName ?? "",
-      sex: student.sex ?? "",
-      age: student.age ?? null,
-      school: student.school ?? "",
-      classCode: student.classCode ?? "",
-      experimentGroup: student.experimentGroup ?? "",
-      classGroupName: student.classGroupName ?? null,
+    profile: {
+      uid,
+      firstName: s.firstName ?? "",
+      lastName: s.lastName ?? "",
+      school: s.school ?? "",
+      classCode: s.classCode ?? "",
+      experimentGroup: s.experimentGroup ?? "",
+      sex: s.sex ?? "",
+      age: s.age ?? null,
     },
-    progress,
-    quizResults,
-    preAnswers,
+    progress: {
+      completedRooms: progress?.completedRooms ?? [],
+      lastQuizResultByRoom: progress?.lastQuizResultByRoom ?? {},
+      quizAttemptsByRoom: progress?.quizAttemptsByRoom ?? {},
+      roomFinishedAt,
+    },
+    srmPre,
+    plan: { rooms: planRooms },
   };
 });

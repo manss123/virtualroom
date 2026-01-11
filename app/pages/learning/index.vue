@@ -14,7 +14,7 @@
       <!-- header -->
       <LearningTopBarVue title="VIRTUAL 360° ROOM" progressMode="time" />
 
-      <div class="w-full max-w-6xl text-center mt-[500px] 3xl:mt-0 py-20">
+      <div class="w-full max-w-6xl text-center mt-[200px] 3xl:mt-0 py-20">
         <p class="text-center mt-2 text-4xl">
           นักเรียนเลือกห้องเรียนได้เลยครับ
         </p>

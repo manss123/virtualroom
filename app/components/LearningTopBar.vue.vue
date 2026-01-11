@@ -2,7 +2,7 @@
 <template>
   <!-- wrapper is pointer-events-none so dragging still works on panorama -->
   <div
-    class="pointer-events-none absolute top-0 left-0 right-0 z-40 flex justify-center mt-7 px-4"
+    class="pointer-events-none absolute top-0 left-0 right-0 z-40 flex justify-center mt-24 px-4"
   >
     <div class="w-full max-w-[90vw] flex flex-col items-center gap-4">
       <!-- Time Left & Exit Button Row -->

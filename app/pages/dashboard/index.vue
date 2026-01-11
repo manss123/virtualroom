@@ -1,8 +1,8 @@
 <template>
-  <div class="w-full">
+  <div class="w-full flex justify-center">
 
     <!-- overlay -->
-    <div class="relative z-10 min-h-screen text-white pb-24">
+    <div class="relative z-10 min-h-screen text-white pb-24 max-w-7xl">
       <div class="max-w-7xl mx-auto px-6 pt-10">
         <div class="text-center">
           <div class="text-4xl font-bold tracking-wide">MY DASHBOARD</div>

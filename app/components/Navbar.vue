@@ -14,6 +14,9 @@
   
         <!-- Logged in -->
         <template v-else>
+          <NuxtLink v-if="me?.email === 'chinapat2535@gmail.com' || me?.email === 'monamorn.research@gmail.com' || me?.email === 'virtual360room@gmail.com'" to="/teacher/dashboard" class="hover:underline">
+            Student Report
+          </NuxtLink>
           <!-- Virtual Room: show only if NOT post-test done -->
           <NuxtLink v-if="!postTestDone" to="/welcome" class="hover:underline">
             Virtual 360° Room
@@ -49,7 +52,7 @@
 <script setup lang="ts">
 import { useAuthState } from '~/composables/useAuthState';
 
-const { authStatus, displayName, postTestDone, refreshAuth, clearAuth } = useAuthState();
+const { authStatus, displayName, postTestDone, refreshAuth, clearAuth, me } = useAuthState();
 
 const logoutPending = ref(false);
 

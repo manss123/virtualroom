@@ -276,18 +276,18 @@ const currentIndex = ref(0);
 const question = computed(() => questionList.value[currentIndex.value]);
 
 // ---------- TIMER (60 MINUTES) ----------
-const { timeLeftText, isTimeUp } = useCountdown(60 * 60, {
+const { timeLeftText, isTimeUp, startedAtMs, endAtMs } = useCountdown(60 * 60, {
+  storageKey: `test_timer_${props.mode}`, // ✅ persists per mode
   onFinished() {
-    // หมดเวลา → ไปหน้าสรุป
-    step.value = 'summary';
+    step.value = "summary";
   },
 });
 
 // ใช้ timestamp ง่าย ๆ สำหรับคำนวณ timeUsedSeconds (ไม่ต้องไปยุ่งกับ useCountdown ภายใน)
-const startedAt = ref(Date.now());
-onMounted(() => {
-  startedAt.value = Date.now();
-});
+// const startedAt = ref(Date.now());
+// onMounted(() => {
+//   startedAt.value = Date.now();
+// });
 // ----------------------------------------
 
 // allAnswers = { '1': { '1.1': 'a', '1.2': 'confident', ... }, '2': {...}, ... }
@@ -397,8 +397,9 @@ const submitAll = async () => {
 
   const payload = {
     answers: allAnswers.value,
-    startedAt: startedAt.value,
+    startedAt: startedAtMs.value,
     finishedAt,
+    timeUsedSeconds: Math.max(0, Math.round((finishedAt - startedAtMs.value) / 1000)),
   };
 
   try {
