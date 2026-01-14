@@ -3,32 +3,18 @@
     <table class="min-w-max w-full border-separate border-spacing-y-3">
       <thead>
         <tr class="text-center text-sm">
-          <th
-            v-for="(c, i) in columns"
-            :key="c"
-            class="px-4 py-3 bg-[#555] text-white font-medium"
-            :class="[i===0 ? 'rounded-l-xl' : '', i===columns.length-1 ? 'rounded-r-xl' : '']"
-            
-          >
+          <th v-for="(c, i) in columns" :key="c" class="px-4 py-3 bg-[#555] text-white font-medium"
+            :class="[i === 0 ? 'rounded-l-xl' : '', i === columns.length - 1 ? 'rounded-r-xl' : '']">
             {{ c }}
           </th>
         </tr>
       </thead>
 
       <tbody>
-        <tr
-          v-for="(r, idx) in rows"
-          :key="r.uid || idx"
-          class="text-center cursor-pointer"
-          @click="$emit('rowClick', r)"
-        >
-          <td
-            v-for="(c, i) in columns"
-            :key="c"
-            class="px-4 py-4 bg-[#444] hover:bg-[#4a4a4a] transition"
-            :class="[i===0 ? 'rounded-l-xl' : '', i===columns.length-1 ? 'rounded-r-xl' : '']"
-            
-          >
+        <tr v-for="(r, idx) in rows" :key="r.uid || idx" class="text-center cursor-pointer"
+          @click="$emit('rowClick', r)">
+          <td v-for="(c, i) in columns" :key="c" class="px-4 py-4 bg-[#444] hover:bg-[#4a4a4a] transition"
+            :class="[i === 0 ? 'rounded-l-xl' : '', i === columns.length - 1 ? 'rounded-r-xl' : '', getPlanStatusClass(r[c])]">
             {{ r[c] ?? "" }}
           </td>
         </tr>
@@ -77,4 +63,14 @@ const stickyLeft = computed(() => {
   }
   return map;
 });
+
+const getPlanStatusClass = (data: string) => {
+  if (data === 'ก่อนกำหนด' || data === 'ภายในกำหนด') {
+    return "text-[#1CD725]";
+  } else if (data === 'เกินกำหนด') {
+    return "text-red";
+  }
+
+  return "";
+}
 </script>

@@ -66,21 +66,29 @@
           @rowClick="(r) => goStudent(r.uid)" />
       </SectionBlockVue>
 
-      <!-- 4) SRM QUESTIONNAIRE TABLE -->
+      <!-- 4) FLAGS TABLE -->
+      <SectionBlockVue title="ตาราง Flags รายข้อ (D,E,F,G) เปรียบเทียบ Pre-test / Post-test"
+        :download="() => exportOneXlsx('flags_by_question', flagsRows)">
+        <DynamicTableVue :rows="flagsRows" :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
+          @rowClick="(r) => goStudent(r.uid)" />
+      </SectionBlockVue>
+
+
+      <!-- 5) SRM QUESTIONNAIRE TABLE -->
       <SectionBlockVue title="ตารางแสดงระดับความคิดเห็นของนักเรียนผ่านแบบประเมินการรู้คิดและการควบคุมการรู้คิด"
         :download="() => exportOneXlsx('srm', srmRows)">
         <DynamicTableVue :rows="srmRows" :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
           @rowClick="(r) => goStudent(r.uid)" />
       </SectionBlockVue>
 
-      <!-- 5) LEARNING PLAN TABLE -->
+      <!-- 6) LEARNING PLAN TABLE -->
       <SectionBlockVue title="ตารางแสดงแผนการเรียน (ตารางเรียน) ของนักเรียน"
         :download="() => exportOneXlsx('learning_plan', planRows)">
         <DynamicTableVue :rows="planRows" :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
           @rowClick="(r) => goStudent(r.uid)" />
       </SectionBlockVue>
 
-      <!-- 6) PLANNED DATE STATUS TABLE -->
+      <!-- 7) PLANNED DATE STATUS TABLE -->
       <SectionBlockVue title="ตารางแสดงสถานะผลการกำหนดเวลาเรียนและข้อความ Reflection ของนักเรียน"
         :download="() => exportOneXlsx('planned_status', statusRows)">
         <DynamicTableVue :rows="statusRows" :sticky-cols="['No.', 'First Name', 'Last Name', 'Group']"
@@ -132,10 +140,12 @@ const { data, pending, error: err } = await useFetch<{
   summary: Summary;
   profileRows: ProfileRow[];
   prePostRows: AnyRow[];
+  flagsRows: AnyRow[];
   srmRows: AnyRow[];
   planRows: AnyRow[];
   statusRows: AnyRow[];
 }>("/api/teacher/dashboard", { method: "GET" });
+
 
 const summary = computed<Summary>(() => data.value?.summary ?? {
   totalStudents: 0,
@@ -149,6 +159,7 @@ const prePostRows = computed<AnyRow[]>(() => data.value?.prePostRows ?? []);
 const srmRows = computed<AnyRow[]>(() => data.value?.srmRows ?? []);
 const planRows = computed<AnyRow[]>(() => data.value?.planRows ?? []);
 const statusRows = computed<AnyRow[]>(() => data.value?.statusRows ?? []);
+const flagsRows = computed<AnyRow[]>(() => data.value?.flagsRows ?? []);
 
 function goStudent(uid: string) {
   router.push(`/teacher/students/${uid}`);
@@ -171,6 +182,8 @@ function exportAllXlsx() {
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(srmRows.value as any[]), "SRM");
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(planRows.value as any[]), "LearningPlan");
   XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(statusRows.value as any[]), "PlannedStatus");
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flagsRows.value as any[]), "Flags");
+
 
   // summary as a tiny table
   XLSX.utils.book_append_sheet(
@@ -216,5 +229,6 @@ function exportAllCsvZipLike() {
   downloadCsv("LearningPlan.csv", planRows.value as any[]);
   downloadCsv("PlannedStatus.csv", statusRows.value as any[]);
   downloadCsv("Summary.csv", [summary.value]);
+  downloadCsv("Flags.csv", flagsRows.value as any[]);
 }
 </script>

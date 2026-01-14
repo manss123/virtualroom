@@ -297,7 +297,12 @@ async function handleDocHotspot(hotspot: HotspotDef) {
   await markHotspotDone(hotspot.id);
 }
 
-async function handleHotspotClick(hotspot: HotspotDef) {
+async function handleHotspotClick(payload: any) {
+  const hotspot: HotspotDef | undefined = payload?.hotspot ?? payload; // supports old + new
+  const trigger = payload?.trigger as "robot" | "download" | undefined;
+
+  if (!hotspot) return;
+
   if (hotspot.type === "video") {
     openModal("youtubeVideo", {
       videoId: hotspot.videoId!,
@@ -308,16 +313,17 @@ async function handleHotspotClick(hotspot: HotspotDef) {
   }
 
   if (hotspot.type === "doc") {
+    if (trigger === "robot") {
+      openModal("roomIntro", { roomKey: hotspot.roomKey });
+      return;
+    }
     await handleDocHotspot(hotspot);
     return;
   }
 
   if (hotspot.type === "quiz") {
-    const quizId = hotspot.roomKey; // ✅ intro1, C1, C2...
-    if (!QUIZZES[quizId]) {
-      console.warn("No quiz config for:", quizId);
-      return;
-    }
+    const quizId = hotspot.roomKey;
+    if (!QUIZZES[quizId]) return;
 
     openModal("quiz", {
       quizId,
@@ -325,7 +331,6 @@ async function handleHotspotClick(hotspot: HotspotDef) {
       roomKey: hotspot.roomKey,
     });
   }
-
 }
 
 let offQuizSubmitted: (() => void) | null = null;

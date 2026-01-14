@@ -328,9 +328,9 @@ const orderedRoomKeys = computed<LearningRoomKey[]>(() => {
 
 // ---------- scores ----------
 const preScoreText = computed(() => {
-  console.log('pretest', preTest.value)
+  // console.log('pretest', preTest.value)
   const item = sumItemScores(preTest.value?.result?.itemScoresByQuestionId);
-  console.log('pre score', item)
+  // console.log('pre score', item)
   if (item) return Math.round(item.sum); // ✅ use raw sum score
   const p = preTest.value?.result?.percent;
   return typeof p === "number" ? Math.round(p) : "-";
@@ -338,7 +338,7 @@ const preScoreText = computed(() => {
 
 const postScoreText = computed(() => {
   const item = sumItemScores(postTest.value?.result?.itemScoresByQuestionId);
-  console.log('post score', item)
+  // console.log('post score', item)
   if (item) return Math.round(item.sum); // ✅ use raw sum score
   const p = postTest.value?.result?.percent;
   return typeof p === "number" ? Math.round(p) : "-";
@@ -346,13 +346,13 @@ const postScoreText = computed(() => {
 
 const preTotalText = computed(() => {
   const item = sumItemScores(preTest.value?.result?.itemScoresByQuestionId);
-  console.log('preTotalText', item)
+  // console.log('preTotalText', item)
   return item ? item.total * 7 : 7 * 17;
 });
 
 const postTotalText = computed(() => {
   const item = sumItemScores(postTest.value?.result?.itemScoresByQuestionId);
-  console.log('postTotalText', item)
+  // console.log('postTotalText', item)
   return item ? item.total * 7 : 7 * 17;
 });
 

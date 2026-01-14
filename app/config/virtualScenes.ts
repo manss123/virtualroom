@@ -70,7 +70,7 @@ export const VIRTUAL_SCENES: SceneDef[] = [
       <div class="hotspot-doc-bubble">
         คลิกไจโรสิ,<br />มีอะไรจะบอก!
       </div>
-      <div class="hotspot-doc-robot"></div>
+      <div class="hotspot-doc-robot" data-hotspot-robot></div>
       <div class="hotspot-doc-panel">
         <div class="hotspot-doc-title">
           ก่อนเข้าเรียน!!<br />มีเอกสารหรือยังเอ่ย?
@@ -144,7 +144,7 @@ export const VIRTUAL_SCENES: SceneDef[] = [
       <div class="hotspot-doc-bubble">
         คลิกไจโรสิ,<br />มีอะไรจะบอก!
       </div>
-      <div class="hotspot-doc-robot"></div>
+      <div class="hotspot-doc-robot" data-hotspot-robot></div>
       <div class="hotspot-doc-panel">
         <div class="hotspot-doc-title">
           ก่อนเข้าเรียน!!<br />มีเอกสารหรือยังเอ่ย?
@@ -236,7 +236,7 @@ export const VIRTUAL_SCENES: SceneDef[] = [
       <div class="hotspot-doc-bubble">
         คลิกไจโรสิ,<br />มีอะไรจะบอก!
       </div>
-      <div class="hotspot-doc-robot"></div>
+      <div class="hotspot-doc-robot" data-hotspot-robot></div>
       <div class="hotspot-doc-panel">
         <div class="hotspot-doc-title">
           ก่อนเข้าเรียน!!<br />มีเอกสารหรือยังเอ่ย?
@@ -359,7 +359,7 @@ export const VIRTUAL_SCENES: SceneDef[] = [
       <div class="hotspot-doc-bubble">
         คลิกไจโรสิ,<br />มีอะไรจะบอก!
       </div>
-      <div class="hotspot-doc-robot"></div>
+      <div class="hotspot-doc-robot" data-hotspot-robot></div>
       <div class="hotspot-doc-panel">
         <div class="hotspot-doc-title">
           ก่อนเข้าเรียน!!<br />มีเอกสารหรือยังเอ่ย?
@@ -482,7 +482,7 @@ export const VIRTUAL_SCENES: SceneDef[] = [
       <div class="hotspot-doc-bubble">
         คลิกไจโรสิ,<br />มีอะไรจะบอก!
       </div>
-      <div class="hotspot-doc-robot"></div>
+      <div class="hotspot-doc-robot" data-hotspot-robot></div>
       <div class="hotspot-doc-panel">
         <div class="hotspot-doc-title">
           ก่อนเข้าเรียน!!<br />มีเอกสารหรือยังเอ่ย?
@@ -593,7 +593,7 @@ export const VIRTUAL_SCENES: SceneDef[] = [
       <div class="hotspot-doc-bubble">
         คลิกไจโรสิ,<br />มีอะไรจะบอก!
       </div>
-      <div class="hotspot-doc-robot"></div>
+      <div class="hotspot-doc-robot" data-hotspot-robot></div>
       <div class="hotspot-doc-panel">
         <div class="hotspot-doc-title">
           ก่อนเข้าเรียน!!<br />มีเอกสารหรือยังเอ่ย?

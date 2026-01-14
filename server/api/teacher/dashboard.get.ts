@@ -11,7 +11,11 @@ function dayEnd(d: Date) {
 
 type PlanStatus = "BEFORE" | "IN_TIME" | "LATE" | "NOT_FINISHED" | "NO_PLAN";
 
-function getRoomPlanStatus(planStartISO?: string | null, planEndISO?: string | null, finishedISO?: string | null): PlanStatus {
+function getRoomPlanStatus(
+  planStartISO?: string | null,
+  planEndISO?: string | null,
+  finishedISO?: string | null
+): PlanStatus {
   if (!planStartISO || !planEndISO) return "NO_PLAN";
   if (!finishedISO) return "NOT_FINISHED";
 
@@ -19,7 +23,11 @@ function getRoomPlanStatus(planStartISO?: string | null, planEndISO?: string | n
   const end = dayEnd(new Date(planEndISO));
   const finished = new Date(finishedISO);
 
-  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || Number.isNaN(finished.getTime())) {
+  if (
+    Number.isNaN(start.getTime()) ||
+    Number.isNaN(end.getTime()) ||
+    Number.isNaN(finished.getTime())
+  ) {
     return "NOT_FINISHED";
   }
 
@@ -39,7 +47,8 @@ function statusThai(st: PlanStatus) {
 function tsToISO(v: any): string | null {
   if (!v) return null;
   if (typeof v?.toDate === "function") return v.toDate().toISOString();
-  if (typeof v?._seconds === "number") return new Date(v._seconds * 1000).toISOString();
+  if (typeof v?._seconds === "number")
+    return new Date(v._seconds * 1000).toISOString();
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
@@ -48,14 +57,18 @@ function fmtThaiShort(iso?: string | null) {
   if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit", year: "2-digit" });
+  return d.toLocaleDateString("th-TH", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  });
 }
-
 
 function pickFirstMap(obj: any, keys: string[]): Record<string, any> | null {
   for (const k of keys) {
     const v = obj?.[k];
-    if (v && typeof v === "object" && !Array.isArray(v)) return v as Record<string, any>;
+    if (v && typeof v === "object" && !Array.isArray(v))
+      return v as Record<string, any>;
   }
   return null;
 }
@@ -114,7 +127,6 @@ function sortKeysSmart(keys: string[]) {
   });
 }
 
-
 type Summary = {
   totalStudents: number;
   pretestDone: number;
@@ -124,7 +136,10 @@ type Summary = {
 
 export default defineEventHandler(async () => {
   // 1) students
-  const snap = await adminDb.collection("students").orderBy("createdAt", "desc").get();
+  const snap = await adminDb
+    .collection("students")
+    .orderBy("createdAt", "desc")
+    .get();
 
   const students = snap.docs.map((d) => {
     const s = d.data() as any;
@@ -143,26 +158,49 @@ export default defineEventHandler(async () => {
   // 2) read per student: progress, plan, tests(pre/post), srm(pre)
   const rows = await Promise.all(
     students.map(async (s) => {
-      const progressRef = adminDb.collection("students").doc(s.uid).collection("progress").doc("gear-train");
-      const planRef = adminDb.collection("students").doc(s.uid).collection("plans").doc("gear-train");
-      const preRef = adminDb.collection("students").doc(s.uid).collection("tests").doc("pre");
-      const postRef = adminDb.collection("students").doc(s.uid).collection("tests").doc("post");
-      const srmPreRef = adminDb.collection("students").doc(s.uid).collection("srm").doc("pre");
+      const progressRef = adminDb
+        .collection("students")
+        .doc(s.uid)
+        .collection("progress")
+        .doc("gear-train");
+      const planRef = adminDb
+        .collection("students")
+        .doc(s.uid)
+        .collection("plans")
+        .doc("gear-train");
+      const preRef = adminDb
+        .collection("students")
+        .doc(s.uid)
+        .collection("tests")
+        .doc("pre");
+      const postRef = adminDb
+        .collection("students")
+        .doc(s.uid)
+        .collection("tests")
+        .doc("post");
+      const srmPreRef = adminDb
+        .collection("students")
+        .doc(s.uid)
+        .collection("srm")
+        .doc("pre");
 
-      const [progressSnap, planSnap, preSnap, postSnap, srmPreSnap] = await Promise.all([
-        progressRef.get(),
-        planRef.get(),
-        preRef.get(),
-        postRef.get(),
-        srmPreRef.get(),
-      ]);
+      const [progressSnap, planSnap, preSnap, postSnap, srmPreSnap] =
+        await Promise.all([
+          progressRef.get(),
+          planRef.get(),
+          preRef.get(),
+          postRef.get(),
+          srmPreRef.get(),
+        ]);
 
       const progress = (progressSnap.exists ? progressSnap.data() : {}) as any;
       const plan = (planSnap.exists ? planSnap.data() : {}) as any;
 
       const pre = (preSnap.exists ? preSnap.data() : null) as any | null;
       const post = (postSnap.exists ? postSnap.data() : null) as any | null;
-      const srmPre = (srmPreSnap.exists ? srmPreSnap.data() : null) as any | null;
+      const srmPre = (srmPreSnap.exists ? srmPreSnap.data() : null) as
+        | any
+        | null;
 
       // normalize roomFinishedAt
       const roomFinishedAt: Record<string, string> = {};
@@ -174,11 +212,13 @@ export default defineEventHandler(async () => {
 
       // normalize plan rooms (min/max dates)
       const planRooms = Array.isArray(plan?.rooms) ? plan.rooms : [];
-      const normalizedRooms = planRooms.map((r: any) => ({
-        roomKey: r.roomKey ?? r.key ?? r.conceptId ?? r.room ?? null,
-        startDate: tsToISO(r.startDate),
-        endDate: tsToISO(r.endDate),
-      })).filter((r: any) => !!r.roomKey);
+      const normalizedRooms = planRooms
+        .map((r: any) => ({
+          roomKey: r.roomKey ?? r.key ?? r.conceptId ?? r.room ?? null,
+          startDate: tsToISO(r.startDate),
+          endDate: tsToISO(r.endDate),
+        }))
+        .filter((r: any) => !!r.roomKey);
 
       const preTestDone = !!progress?.preTestDone;
       const postTestDone = !!progress?.postTestDone;
@@ -214,10 +254,10 @@ export default defineEventHandler(async () => {
   roomKeys.sort((a, b) => {
     const ia = preferred.indexOf(a);
     const ib = preferred.indexOf(b);
-    if (ia !== -1 || ib !== -1) return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+    if (ia !== -1 || ib !== -1)
+      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
     return a.localeCompare(b);
   });
-
 
   // 3) summary
   const summary: Summary = {
@@ -248,12 +288,22 @@ export default defineEventHandler(async () => {
 
   for (const r of rows) {
     const preMap =
-      pickFirstMap(r.tests.pre, ["itemScoresByQuestionId", "itemAnswersByQuestionId", "answersByQuestionId"]) ?? {};
+      pickFirstMap(r.tests.pre, [
+        "itemScoresByQuestionId",
+        "itemAnswersByQuestionId",
+        "answersByQuestionId",
+      ]) ?? {};
     const postMap =
-      pickFirstMap(r.tests.post, ["itemScoresByQuestionId", "itemAnswersByQuestionId", "answersByQuestionId"]) ?? {};
+      pickFirstMap(r.tests.post, [
+        "itemScoresByQuestionId",
+        "itemAnswersByQuestionId",
+        "answersByQuestionId",
+      ]) ?? {};
 
-    for (const k of Object.keys(preMap)) allPreKeys.add(normalizeTestKey("pre", k));
-    for (const k of Object.keys(postMap)) allPostKeys.add(normalizeTestKey("post", k));
+    for (const k of Object.keys(preMap))
+      allPreKeys.add(normalizeTestKey("pre", k));
+    for (const k of Object.keys(postMap))
+      allPostKeys.add(normalizeTestKey("post", k));
   }
 
   const preCols = sortKeysSmart([...allPreKeys]);
@@ -261,9 +311,17 @@ export default defineEventHandler(async () => {
 
   const prePostRows = rows.map((r, idx) => {
     const preMapRaw =
-      pickFirstMap(r.tests.pre, ["itemScoresByQuestionId", "itemAnswersByQuestionId", "answersByQuestionId"]) ?? {};
+      pickFirstMap(r.tests.pre, [
+        "itemScoresByQuestionId",
+        "itemAnswersByQuestionId",
+        "answersByQuestionId",
+      ]) ?? {};
     const postMapRaw =
-      pickFirstMap(r.tests.post, ["itemScoresByQuestionId", "itemAnswersByQuestionId", "answersByQuestionId"]) ?? {};
+      pickFirstMap(r.tests.post, [
+        "itemScoresByQuestionId",
+        "itemAnswersByQuestionId",
+        "answersByQuestionId",
+      ]) ?? {};
 
     const row: Record<string, any> & { uid: string } = {
       uid: r.student.uid,
@@ -284,26 +342,39 @@ export default defineEventHandler(async () => {
       ];
       let v: any = "";
       for (const c of rawCandidates) {
-        if (c in preMapRaw) { v = preMapRaw[c]; break; }
+        if (c in preMapRaw) {
+          v = preMapRaw[c];
+          break;
+        }
         const c2 = c.toLowerCase();
-        const found = Object.keys(preMapRaw).find((k) => k.toLowerCase() === c2);
-        if (found) { v = preMapRaw[found]; break; }
+        const found = Object.keys(preMapRaw).find(
+          (k) => k.toLowerCase() === c2
+        );
+        if (found) {
+          v = preMapRaw[found];
+          break;
+        }
       }
       row[col] = v ?? "";
     }
 
     // fill POST columns
     for (const col of postCols) {
-      const rawCandidates = [
-        col,
-        col.replace(/^POST_/, ""),
-      ];
+      const rawCandidates = [col, col.replace(/^POST_/, "")];
       let v: any = "";
       for (const c of rawCandidates) {
-        if (c in postMapRaw) { v = postMapRaw[c]; break; }
+        if (c in postMapRaw) {
+          v = postMapRaw[c];
+          break;
+        }
         const c2 = c.toLowerCase();
-        const found = Object.keys(postMapRaw).find((k) => k.toLowerCase() === c2);
-        if (found) { v = postMapRaw[found]; break; }
+        const found = Object.keys(postMapRaw).find(
+          (k) => k.toLowerCase() === c2
+        );
+        if (found) {
+          v = postMapRaw[found];
+          break;
+        }
       }
       row[col] = v ?? "";
     }
@@ -312,142 +383,217 @@ export default defineEventHandler(async () => {
   });
 
   // ---------------------------
-// ✅ 6) SRM RAW TABLE (by item)
-// ---------------------------
-const allSrmKeys = new Set<string>();
+  // ✅ 6) SRM RAW TABLE (by item)
+  // ---------------------------
+  const allSrmKeys = new Set<string>();
 
-function getSrmAnswersMap(srmDoc: any): Record<string, any> {
-  // Your POST saves "answers"
-  return (
-    pickFirstMap(srmDoc, [
-      "answers",                 // ✅ NEW (matches POST)
-      "answersByQuestionId",
-      "responsesByItemId",
-      "itemResponses",
-      "itemScoresByQuestionId",
-    ]) ??
-    // support older "wrapped" shapes if any
-    pickFirstMap(srmDoc?.result, [
-      "answers",
-      "answersByQuestionId",
-      "responsesByItemId",
-      "itemResponses",
-      "itemScoresByQuestionId",
-    ]) ??
-    {}
-  );
-}
-
-for (const r of rows) {
-  const srmDoc = r.srm.pre;
-  const map = getSrmAnswersMap(srmDoc);
-  for (const k of Object.keys(map)) allSrmKeys.add(normalizeSrmKey(k));
-}
-
-const srmCols = sortKeysSmart([...allSrmKeys]);
-
-const srmRows = rows.map((r, idx) => {
-  const map = getSrmAnswersMap(r.srm.pre);
-
-  const row: Record<string, any> & { uid: string } = {
-    uid: r.student.uid,
-    "No.": idx + 1,
-    "First Name": r.student.firstName,
-    "Last Name": r.student.lastName,
-    Group: r.student.experimentGroup,
-  };
-
-  for (const col of srmCols) {
-    const rawCandidates = [col, col.replace(/^Q/i, "")]; // Q12 <-> 12
-    let v: any = "";
-
-    for (const c of rawCandidates) {
-      if (c in map) { v = map[c]; break; }
-      const found = Object.keys(map).find((k) => k.toLowerCase() === c.toLowerCase());
-      if (found) { v = map[found]; break; }
-    }
-
-    row[col] = v ?? "";
+  function getSrmAnswersMap(srmDoc: any): Record<string, any> {
+    // Your POST saves "answers"
+    return (
+      pickFirstMap(srmDoc, [
+        "answers", // ✅ NEW (matches POST)
+        "answersByQuestionId",
+        "responsesByItemId",
+        "itemResponses",
+        "itemScoresByQuestionId",
+      ]) ??
+      // support older "wrapped" shapes if any
+      pickFirstMap(srmDoc?.result, [
+        "answers",
+        "answersByQuestionId",
+        "responsesByItemId",
+        "itemResponses",
+        "itemScoresByQuestionId",
+      ]) ??
+      {}
+    );
   }
 
-  return row;
-});
+  // ---------------------------
+  // ✅ 7) FLAGS TABLE (PRE/POST D,E,F,G by question)
+  // ---------------------------
+  const allFlagQids = new Set<string>();
 
+  for (const r of rows) {
+    const preFlags = getFlagsMap(r.tests.pre);
+    const postFlags = getFlagsMap(r.tests.post);
+
+    for (const k of Object.keys(preFlags)) allFlagQids.add(String(k));
+    for (const k of Object.keys(postFlags)) allFlagQids.add(String(k));
+  }
+
+  // sort Q ids numerically when possible
+  const flagQids = [...allFlagQids].sort((a, b) => Number(a) - Number(b));
+
+  const flagsRows = rows.map((r, idx) => {
+    const preFlags = getFlagsMap(r.tests.pre);
+    const postFlags = getFlagsMap(r.tests.post);
+
+    const row: Record<string, any> & { uid: string } = {
+      uid: r.student.uid,
+      "No.": idx + 1,
+      "First Name": r.student.firstName,
+      "Last Name": r.student.lastName,
+      Group: r.student.experimentGroup,
+    };
+
+    // ✅ all PRE first
+    for (const qId of flagQids) {
+      const p = preFlags[qId];
+      row[`Q${qId}_PRE_D`] = padFlag(p?.D);
+      row[`Q${qId}_PRE_E`] = padFlag(p?.E);
+      row[`Q${qId}_PRE_F`] = padFlag(p?.F);
+      row[`Q${qId}_PRE_G`] = padFlag(p?.G);
+    }
+
+    // ✅ then all POST
+    for (const qId of flagQids) {
+      const o = postFlags[qId];
+      row[`Q${qId}_POST_D`] = padFlag(o?.D);
+      row[`Q${qId}_POST_E`] = padFlag(o?.E);
+      row[`Q${qId}_POST_F`] = padFlag(o?.F);
+      row[`Q${qId}_POST_G`] = padFlag(o?.G);
+    }
+
+    return row;
+  });
+
+  for (const r of rows) {
+    const srmDoc = r.srm.pre;
+    const map = getSrmAnswersMap(srmDoc);
+    for (const k of Object.keys(map)) allSrmKeys.add(normalizeSrmKey(k));
+  }
+
+  const srmCols = sortKeysSmart([...allSrmKeys]);
+
+  const srmRows = rows.map((r, idx) => {
+    const map = getSrmAnswersMap(r.srm.pre);
+
+    const row: Record<string, any> & { uid: string } = {
+      uid: r.student.uid,
+      "No.": idx + 1,
+      "First Name": r.student.firstName,
+      "Last Name": r.student.lastName,
+      Group: r.student.experimentGroup,
+    };
+
+    for (const col of srmCols) {
+      const rawCandidates = [col, col.replace(/^Q/i, "")]; // Q12 <-> 12
+      let v: any = "";
+
+      for (const c of rawCandidates) {
+        if (c in map) {
+          v = map[c];
+          break;
+        }
+        const found = Object.keys(map).find(
+          (k) => k.toLowerCase() === c.toLowerCase()
+        );
+        if (found) {
+          v = map[found];
+          break;
+        }
+      }
+
+      row[col] = v ?? "";
+    }
+
+    return row;
+  });
 
   // ---------------------------
   // (keep your plan/status tables as you already had)
   // ---------------------------
   const planRows = rows.map((r, i) => {
-  const row: Record<string, any> & { uid: string } = {
-    uid: r.student.uid,
-    "No.": i + 1,
-    "First Name": r.student.firstName,
-    "Last Name": r.student.lastName,
-    Group: r.student.experimentGroup,
-  };
+    const row: Record<string, any> & { uid: string } = {
+      uid: r.student.uid,
+      "No.": i + 1,
+      "First Name": r.student.firstName,
+      "Last Name": r.student.lastName,
+      Group: r.student.experimentGroup,
+    };
 
-  // map for quick lookup
-  const planMap: Record<string, any> = {};
-  for (const pr of r.plan.rooms) planMap[pr.roomKey] = pr;
+    // map for quick lookup
+    const planMap: Record<string, any> = {};
+    for (const pr of r.plan.rooms) planMap[pr.roomKey] = pr;
 
-  for (const key of roomKeys) {
-    const pr = planMap[key];
-    row[`${key} Start`] = fmtThaiShort(pr?.startDate ?? null);
-    row[`${key} End`] = fmtThaiShort(pr?.endDate ?? null);
-  }
+    for (const key of roomKeys) {
+      const pr = planMap[key];
+      row[`${key} Start`] = fmtThaiShort(pr?.startDate ?? null);
+      row[`${key} End`] = fmtThaiShort(pr?.endDate ?? null);
+    }
 
-  return row;
-});
-
+    return row;
+  });
 
   const statusRows = rows.map((r, i) => {
-  const row: Record<string, any> & { uid: string } = {
-    uid: r.student.uid,
-    "No.": i + 1,
-    "First Name": r.student.firstName,
-    "Last Name": r.student.lastName,
-    Group: r.student.experimentGroup,
-  };
+    const row: Record<string, any> & { uid: string } = {
+      uid: r.student.uid,
+      "No.": i + 1,
+      "First Name": r.student.firstName,
+      "Last Name": r.student.lastName,
+      Group: r.student.experimentGroup,
+    };
 
-  const planMap: Record<string, any> = {};
-  for (const pr of r.plan.rooms) planMap[pr.roomKey] = pr;
+    const planMap: Record<string, any> = {};
+    for (const pr of r.plan.rooms) planMap[pr.roomKey] = pr;
 
-  let hasLate = false;
-  let hasNotFinished = false;
+    let hasLate = false;
+    let hasNotFinished = false;
 
-  for (const key of roomKeys) {
-    const pr = planMap[key];
-    const finishedISO = r.progress.roomFinishedAt?.[key] ?? null;
+    for (const key of roomKeys) {
+      const pr = planMap[key];
+      const finishedISO = r.progress.roomFinishedAt?.[key] ?? null;
 
-    const st = getRoomPlanStatus(pr?.startDate ?? null, pr?.endDate ?? null, finishedISO);
-    row[`${key} Status`] = statusThai(st);
+      const st = getRoomPlanStatus(
+        pr?.startDate ?? null,
+        pr?.endDate ?? null,
+        finishedISO
+      );
+      row[`${key} Status`] = statusThai(st);
 
-    if (st === "LATE") hasLate = true;
-    if (st === "NOT_FINISHED") hasNotFinished = true;
+      if (st === "LATE") hasLate = true;
+      if (st === "NOT_FINISHED") hasNotFinished = true;
+    }
+
+    // overall summary (what you want: เกินกำหนด / ภายใจกำหนด / ก่อนกำหนด)
+    // practical definition:
+    // - if any late => เกินกำหนด
+    // - else if any not finished => ภายใจกำหนด (still within plan / ongoing)
+    // - else => ก่อนกำหนด or ภายใจกำหนด (choose one)
+    let overall = "ภายในกำหนด";
+    if (hasLate) overall = "เกินกำหนด";
+    else if (!hasNotFinished) overall = "ก่อนกำหนด";
+
+    row["Overall Status"] = overall;
+
+    row["Reflection"] = r.progress.reflection?.submitted
+      ? r.progress.reflection?.text ?? ""
+      : "";
+
+    return row;
+  });
+
+  function getFlagsMap(
+    testDoc: any
+  ): Record<string, { D: number; E: number; F: number; G: number }> {
+    return (
+      pickFirstMap(testDoc, ["flagsByQuestionId"]) ??
+      pickFirstMap(testDoc?.result, ["flagsByQuestionId"]) ?? // if older wrapper exists
+      {}
+    );
   }
 
-  // overall summary (what you want: เกินกำหนด / ภายใจกำหนด / ก่อนกำหนด)
-  // practical definition:
-  // - if any late => เกินกำหนด
-  // - else if any not finished => ภายใจกำหนด (still within plan / ongoing)
-  // - else => ก่อนกำหนด or ภายใจกำหนด (choose one)
-  let overall = "ภายในกำหนด";
-  if (hasLate) overall = "เกินกำหนด";
-  else if (!hasNotFinished) overall = "ก่อนกำหนด";
-
-  row["Overall Status"] = overall;
-
-  row["Reflection"] =
-    r.progress.reflection?.submitted ? (r.progress.reflection?.text ?? "") : "";
-
-  return row;
-});
-
+  function padFlag(v: any) {
+    // you can also return "" instead of "-"
+    return typeof v === "number" ? v : "";
+  }
 
   return {
     summary,
     profileRows,
     prePostRows,
+    flagsRows,
     srmRows,
     planRows,
     statusRows,

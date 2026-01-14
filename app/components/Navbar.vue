@@ -56,6 +56,8 @@ const { authStatus, displayName, postTestDone, refreshAuth, clearAuth, me } = us
 
 const logoutPending = ref(false);
 
+console.log(me.value)
+
 async function logout() {
   try {
     logoutPending.value = true;

@@ -26,6 +26,10 @@
 <script lang="ts" setup>
 import bg from '~/assets/images/bg/welcome-bg.png'
 
+definePageMeta({
+  middleware: ["auth"],
+});
+
 const router = useRouter()
 
 const goToLearningHome = () => {

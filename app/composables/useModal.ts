@@ -1,5 +1,5 @@
 // composables/useModal.ts
-type ModalType = "none" | "imageZoom" | "youtubeVideo"| "quiz";
+type ModalType = "none" | "imageZoom" | "youtubeVideo"| "quiz" | "roomIntro";
 
 type ImageZoomPayload = { src: string };
 

@@ -21,7 +21,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "hotspotClick", hotspot: HotspotDef): void;
+  (e: "hotspotClick", payload: { hotspot: HotspotDef; trigger?: "robot" | "download" }): void;
 }>();
 
 const el = ref<HTMLDivElement | null>(null);
@@ -143,29 +143,35 @@ onMounted(async () => {
       if (h.html) {
         inner.innerHTML = h.html;
 
-        // Prefer explicit click target(s)
-        const clickTargets = Array.from(
-          inner.querySelectorAll("[data-hotspot-click]")
-        ) as HTMLElement[];
-
-        // Fallback: if no data-hotspot-click, make whole card clickable
-        const targets = clickTargets.length ? clickTargets : [inner];
+        const robot = inner.querySelector("[data-hotspot-robot]") as HTMLElement | null;
+        const downloadBtn = inner.querySelector("[data-hotspot-click]") as HTMLElement | null;
 
         if (state !== "locked") {
-          targets.forEach((t) => {
-            t.style.pointerEvents = "auto";
-            t.addEventListener("click", (e) => {
+          // Robot click -> open another modal
+          if (robot) {
+            robot.style.pointerEvents = "auto";
+            robot.addEventListener("click", (e) => {
               e.preventDefault();
               e.stopPropagation();
-              emit("hotspotClick", h);
+              emit("hotspotClick", { hotspot: h, trigger: "robot" });
             });
-          });
+          }
+
+          // Download click -> existing behavior
+          if (downloadBtn) {
+            downloadBtn.style.pointerEvents = "auto";
+            downloadBtn.addEventListener("click", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              emit("hotspotClick", { hotspot: h, trigger: "download" });
+            });
+          }
         } else {
           // lock: disable clicking + dim
-          targets.forEach((t) => {
-            t.style.pointerEvents = "none";
-            t.style.opacity = "0.5";
-            t.style.filter = "grayscale(0.6)";
+          [robot, downloadBtn].filter(Boolean).forEach((t) => {
+            (t as HTMLElement).style.pointerEvents = "none";
+            (t as HTMLElement).style.opacity = "0.5";
+            (t as HTMLElement).style.filter = "grayscale(0.6)";
           });
         }
 
@@ -218,7 +224,7 @@ onMounted(async () => {
           tv.classList.add("is-locked");
           tv.style.pointerEvents = "none";
         } else {
-          tv.addEventListener("click", () => emit("hotspotClick", h));
+          tv.addEventListener("click", () => emit("hotspotClick", { hotspot: h }));
         }
 
         inner.appendChild(tv);
@@ -247,7 +253,7 @@ onMounted(async () => {
       btn.appendChild(caption);
 
       if (state !== "locked") {
-        btn.addEventListener("click", () => emit("hotspotClick", h));
+        btn.addEventListener("click", () => emit("hotspotClick", { hotspot: h }));
       } else {
         btn.disabled = true;
       }
@@ -463,6 +469,7 @@ watch(
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
+  cursor: pointer;
 }
 
 /* bottom panel */
