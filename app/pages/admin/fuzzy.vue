@@ -1,4 +1,4 @@
-<!-- pages/admin/fuzzy-playground.vue -->
+<!-- pages/admin/fuzzy.vue -->
 <template>
     <div class="p-8 space-y-6 text-white">
         <h1 class="text-2xl font-semibold">
@@ -17,8 +17,8 @@
                         <th class="px-3 py-2 text-left">Q#</th>
                         <th class="px-3 py-2 text-left">Main text (ย่อ)</th>
                         <th class="px-3 py-2 text-center">D (Q .1 ถูก?)</th>
-                        <th class="px-3 py-2 text-center">F (มั่นใจ .2)</th>
-                        <th class="px-3 py-2 text-center">E (Q .3 ถูก?)</th>
+                        <th class="px-3 py-2 text-center">E (มั่นใจ .2)</th>
+                        <th class="px-3 py-2 text-center">F (Q .3 ถูก?)</th>
                         <th class="px-3 py-2 text-center">G (มั่นใจ .4)</th>
                         <th class="px-3 py-2 text-center">Tier</th>
                         <th class="px-3 py-2 text-center">Score (0–7)</th>
@@ -41,15 +41,7 @@
                             </select>
                         </td>
 
-                        <!-- F -->
-                        <td v-if="flags[q.id]" class="px-3 py-2 text-center">
-                            <select v-model.number="flags[q.id].F" class="border rounded px-2 py-1 text-sm">
-                                <option :value="1">1</option>
-                                <option :value="0">0</option>
-                            </select>
-                        </td>
-
-                        <!-- E -->
+                        <!-- E (มั่นใจ .2) -->
                         <td v-if="flags[q.id]" class="px-3 py-2 text-center">
                             <select v-model.number="flags[q.id].E" class="border rounded px-2 py-1 text-sm">
                                 <option :value="1">1</option>
@@ -57,14 +49,22 @@
                             </select>
                         </td>
 
+                        <!-- F (Q .3 ถูก?) -->
+                        <td v-if="flags[q.id]" class="px-3 py-2 text-center">
+                            <select v-model.number="flags[q.id].F" class="border rounded px-2 py-1 text-sm">
+                                <option :value="1">1</option>
+                                <option :value="0">0</option>
+                            </select>
+                        </td>
 
-                        <!-- G -->
+                        <!-- G (มั่นใจ .4) -->
                         <td v-if="flags[q.id]" class="px-3 py-2 text-center">
                             <select v-model.number="flags[q.id].G" class="border rounded px-2 py-1 text-sm">
                                 <option :value="1">1</option>
                                 <option :value="0">0</option>
                             </select>
                         </td>
+
 
                         <!-- Results from server -->
                         <td class="px-3 py-2 text-center">
@@ -225,53 +225,52 @@ function buildAnswersFromFlags(flagsInput: Record<number, Flags>) {
 
     for (const q of questions as any[]) {
         const qFlags = flagsInput[q.id] || { D: 0, E: 0, F: 0, G: 0 };
+
         const baseId = String(q.id);
         const id1 = `${baseId}.1`;
         const id2 = `${baseId}.2`;
         const id3 = `${baseId}.3`;
         const id4 = `${baseId}.4`;
 
+        const qAns: Record<string, string> = {};
+
+        const sec1 = q.sections.find((s: any) => s.id === id1);
+        const sec3 = q.sections.find((s: any) => s.id === id3);
+
+        const has1 = !!sec1;
+        const has2 = q.sections.some((s: any) => s.id === id2);
+        const has3 = !!sec3;
+        const has4 = q.sections.some((s: any) => s.id === id4);
+
         const correct1 = prePostTestAnswerKey[id1];
         const correct3 = prePostTestAnswerKey[id3];
 
-        const qAns: Record<string, string> = {};
-
-        // 1.1 → D (ถูก/ผิด)
-        if (correct1) {
-            if (qFlags.D === 1) {
-                qAns[id1] = correct1;
-            } else {
-                const sec1 = q.sections.find((s: any) => s.id === id1);
+        // D = correct of 1.1
+        if (has1 && correct1) {
+            if (qFlags.D === 1) qAns[id1] = correct1;
+            else {
                 const wrongOpt =
                     sec1?.options?.find((opt: any) => opt.value !== correct1) ?? null;
-                if (wrongOpt) {
-                    qAns[id1] = wrongOpt.value;
-                }
+                qAns[id1] = wrongOpt?.value ?? ""; // force wrong
             }
         }
 
-        // 1.3 → E (ถูก/ผิด)
-        if (correct3) {
-            if (qFlags.E === 1) {
-                qAns[id3] = correct3;
-            } else {
-                const sec3 = q.sections.find((s: any) => s.id === id3);
+        // E = confidence of 1.2
+        if (has2) {
+            qAns[id2] = qFlags.E === 1 ? "confident" : "not_confident";
+        }
+
+        // F = correct of 1.3
+        if (has3 && correct3) {
+            if (qFlags.F === 1) qAns[id3] = correct3;
+            else {
                 const wrongOpt =
                     sec3?.options?.find((opt: any) => opt.value !== correct3) ?? null;
-                if (wrongOpt) {
-                    qAns[id3] = wrongOpt.value;
-                }
+                qAns[id3] = wrongOpt?.value ?? ""; // force wrong
             }
         }
 
-        // 1.2 → F (มั่นใจ / ไม่)
-        const has2 = q.sections.some((s: any) => s.id === id2);
-        if (has2) {
-            qAns[id2] = qFlags.F === 1 ? "confident" : "not_confident";
-        }
-
-        // 1.4 → G (มั่นใจ / ไม่)
-        const has4 = q.sections.some((s: any) => s.id === id4);
+        // G = confidence of 1.4
         if (has4) {
             qAns[id4] = qFlags.G === 1 ? "confident" : "not_confident";
         }
@@ -282,6 +281,7 @@ function buildAnswersFromFlags(flagsInput: Record<number, Flags>) {
     return result;
 }
 
+
 async function runPreview() {
     loading.value = true;
     errorMessage.value = null;
@@ -289,6 +289,8 @@ async function runPreview() {
 
     try {
         const answers = buildAnswersFromFlags(flags.value);
+        console.log("Q3 answers", answers[3]); // or answers["3"] depending on your keys
+
         const res = await $fetch("/api/tests/preview", {
             method: "POST",
             body: { answers },

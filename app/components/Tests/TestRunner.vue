@@ -22,7 +22,6 @@
               <img class="max-w-[980px] h-auto rounded-nw cursor-zoom-in" :src="getImageURL(question.mainImage)" alt=""
                 @click="openZoom(getImageURL(question.mainImage))" />
             </div>
-
           </div>
         </div>
 
@@ -32,15 +31,28 @@
           <QuestionBlock v-for="section in question.sections" :key="section.id" :block="section"
             v-model="allAnswers[question.id][section.id]" />
 
+          <div v-if="isInGrace" class="mt-6 text-[#D71C1C] text-[22px] font-bold text-center">
+            หมดเวลา 60 นาทีแล้ว! มีเวลาแก้ไขเพิ่มเติมอีก 5 นาทีเท่านั้น
+          </div>
+
+          <div v-else-if="isFinalTimeUp" class="mt-6 text-[#D71C1C] text-[22px] font-bold text-center">
+            หมดเวลาแล้ว ระบบกำลังส่ง{{ kindLabel }}อัตโนมัติ...
+          </div>
+
+          <!-- ปุ่มด้านล่าง -->
           <div class="absolute -bottom-7 flex left-0 w-full justify-evenly">
+            <!-- Back / Go missing -->
             <button @click="goPrev" :disabled="isFirst"
               class="flex w-[300px] h-[80px] text-[26px] bg-[#9DA7A9] hover:bg-[#BDC3C9] text-black drop-shadow-xl rounded-[15px] items-center justify-center cursor-pointer"
               :class="{ 'opacity-40 cursor-not-allowed': isFirst }">
-              ย้อนกลับไป
+              {{
+                isAllAnswered ? "ย้อนกลับไปทบทวน" : "ย้อนกลับไป"
+              }}
             </button>
+            <!-- Submit: allow always (even incomplete), but disable after final -->
             <button @click="goNext"
               class="flex w-[300px] h-[80px] text-[26px] bg-[#FFC233] hover:bg-[#B97530] text-black hover:text-white drop-shadow-xl rounded-[15px] items-center justify-center cursor-pointer">
-              {{ isLast ? 'ส่งแบบทดสอบ' : 'ไปต่อเลย' }}
+              {{ isLast ? "ส่งแบบทดสอบ" : "ไปต่อเลย" }}
             </button>
           </div>
         </div>
@@ -51,31 +63,29 @@
         </div>
       </div>
 
-      <div v-else class="mt-20 text-white text-xl">
-        ไม่พบข้อคำถาม
-      </div>
+      <div v-else class="mt-20 text-white text-xl">ไม่พบข้อคำถาม</div>
     </div>
 
     <!-- SUMMARY (reusable component) -->
     <AssessmentSummary v-else-if="step === 'summary'" :mode-label="modeLabel" kind-label="แบบทดสอบ"
-      :is-all-answered="isAllAnswered" :missing-questions="missingQuestions" :is-time-up="isTimeUp"
+      :is-all-answered="isAllAnswered" :missing-questions="missingQuestions" :is-main-time-up="isMainTimeUp"
+      :is-final-time-up="isFinalTimeUp" :is-in-grace="isInGrace"
       :happy-image="getImageURL('images/cartoons/gear-happy.png')"
       :confused-image="getImageURL('images/cartoons/gear-confused.png')" @back="backToPractice"
       @goToFirstMissing="goToFirstMissing" @submit="submitFromSummary" />
-
   </AssessmentLayout>
 </template>
 
 <script setup>
-import { questions as defaultQuestions } from '@/config/testConfig';
-import { prePostTestAnswerKey } from '@/config/testAnswerKey';
+import { questions as defaultQuestions } from "@/config/testConfig";
+import { prePostTestAnswerKey } from "@/config/testAnswerKey";
 
-import AssessmentHeader from '~/components/Tests/AssessmentHeader.vue';
-import AssessmentLayout from '~/components/Tests/AssessmentLayout.vue';
-import AssessmentSummary from '~/components/Tests/AssessmentSummary.vue';
-import QuestionBlock from '~/components/Tests/QuestionBlock.vue';
+import AssessmentHeader from "~/components/Tests/AssessmentHeader.vue";
+import AssessmentLayout from "~/components/Tests/AssessmentLayout.vue";
+import AssessmentSummary from "~/components/Tests/AssessmentSummary.vue";
+import QuestionBlock from "~/components/Tests/QuestionBlock.vue";
 
-import { useCountdown } from '~/composables/useCountdown';
+import { useCountdown } from "~/composables/useCountdown";
 
 const layoutRef = ref(null);
 
@@ -88,212 +98,99 @@ const { openModal } = useModal();
 
 const openZoom = (src) => openModal("imageZoom", { src });
 
-// ====== 4-tier → SC/LK → score ======
-
-const CODE_SCORE = {
-  SC: 7,
-  LK1: 6,
-  FP: 5,
-  LK2: 4,
-  FN: 3,
-  LK3: 2,
-  MSC: 1,
-  LK4: 0,
-};
-
-/**
- * EXACT translation of your Excel IF logic.
- * Input: D,E,F,G ∈ {0,1}
- */
-function classifyFromFlags(D, E, F, G) {
-  if (D === 1 && E === 1 && F === 1 && G === 1) return 'SC';
-
-  if (D === 1 && E === 1 && F === 1 && G === 0) return 'LK1';
-  if (D === 1 && E === 0 && F === 1 && G === 1) return 'LK1';
-  if (D === 1 && E === 0 && F === 1 && G === 0) return 'LK1';
-
-  if (D === 1 && E === 1 && F === 0 && G === 1) return 'FP';
-
-  if (D === 1 && E === 1 && F === 0 && G === 0) return 'LK2';
-  if (D === 1 && E === 0 && F === 0 && G === 1) return 'LK2';
-  if (D === 1 && E === 0 && F === 0 && G === 0) return 'LK2';
-
-  if (D === 0 && E === 1 && F === 1 && G === 1) return 'FN';
-
-  if (D === 0 && E === 1 && F === 1 && G === 0) return 'LK3';
-  if (D === 0 && E === 0 && F === 1 && G === 1) return 'LK3';
-  if (D === 0 && E === 0 && F === 1 && G === 0) return 'LK3';
-
-  if (D === 0 && E === 1 && F === 0 && G === 1) return 'MSC';
-
-  return 'LK4';
-}
-
-/**
- * TODO: Implement this from your 4-tier design.
- * It should derive the D,E,F,G flags (0/1) from a student's
- * raw answer for ONE section.
- *
- * You have everything you need in:
- *   - section: metadata of this sub-question
- *   - studentAnswer: value from allAnswers[questionId][sectionId]
- *   - correctAnswer: value from prePostTestAnswerKey[sectionId]
- *
- * For now this stub only distinguishes "correct vs incorrect" (D).
- */
-function computeFlagsForQuestion(question, qAnswers) {
-  const baseId = String(question.id);      // e.g. 1
-  const id1 = `${baseId}.1`;              // 1.1
-  const id2 = `${baseId}.2`;              // 1.2 (confidence)
-  const id3 = `${baseId}.3`;              // 1.3
-  const id4 = `${baseId}.4`;              // 1.4 (confidence)
-
-  const ans1 = qAnswers[id1];
-  const ans3 = qAnswers[id3];
-  const conf1 = qAnswers[id2];
-  const conf3 = qAnswers[id4];
-
-  const correct1 = prePostTestAnswerKey[id1];
-  const correct3 = prePostTestAnswerKey[id3];
-
-  // ถ้าไม่มีเฉลย (เช่นบางข้อไม่มี 1.3) ก็จะได้ 0 อัตโนมัติ
-  const D = correct1 ? (ans1 === correct1 ? 1 : 0) : 0;
-  const E = correct3 ? (ans3 === correct3 ? 1 : 0) : 0;
-
-  // แปลง 'confident' / 'not_confident' → 1 / 0
-  const F = conf1 === 'confident' ? 1 : 0;
-  const G = conf3 === 'confident' ? 1 : 0;
-
-  return { D, E, F, G };
-}
-
-// ====== Concept mapping (T_jk) ======
-
-// conceptId -> list of sectionIds (e.g. '1.1', '2.3', ...)
-// MUST match the matrix in your Excel.
-const CONCEPT_CONFIG = {
-  C1: [1, 2, 4, 5, 6, 7],
-  C2: [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17],
-  C3: [3, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17],
-  C4: [3, 13, 14, 16],
-};
-
-
-// ====== Fuzzy membership for LOW / AVERAGE / HIGH ======
-
-const FUZZY_PARAMS = {
-  // TODO: set these from your sheet (for scores in 0–7)
-  alpha: 0,
-  beta: 3.5,
-  gamma: 7,
-};
-
-function lowMembership(x, p = FUZZY_PARAMS) {
-  const { alpha, beta, gamma } = p;
-  if (x <= alpha) return 1;
-  if (x <= beta) return 1 - 2 * Math.pow((x - alpha) / (gamma - alpha), 2);
-  if (x <= gamma) return 2 * Math.pow((x - gamma) / (gamma - alpha), 2);
-  return 0;
-}
-
-function averageMembership(x, p = FUZZY_PARAMS) {
-  const { alpha, beta, gamma } = p;
-  const mid1 = (alpha + beta) / 2;
-  const mid2 = (beta + gamma) / 2;
-
-  if (x <= alpha) return 0;
-  if (x <= mid1) return 2 * Math.pow((x - alpha) / (beta - alpha), 2);
-  if (x <= beta) return 1 - 2 * Math.pow((x - beta) / (beta - alpha), 2);
-  if (x <= mid2) return 1 - 2 * Math.pow((x - beta) / (gamma - beta), 2);
-  if (x <= gamma) return 2 * Math.pow((x - gamma) / (gamma - beta), 2);
-  return 0;
-}
-
-function highMembership(x, p = FUZZY_PARAMS) {
-  const { alpha, beta, gamma } = p;
-  if (x <= alpha) return 0;
-  if (x <= beta) return 2 * Math.pow((x - alpha) / (gamma - alpha), 2);
-  if (x <= gamma) return 1 - 2 * Math.pow((x - gamma) / (gamma - alpha), 2);
-  return 1;
-}
-
-/** Score_{i,k} = mean S_ij over items in each concept */
-function computeConceptScores(itemScores) {
-  const conceptScores = {};
-
-  for (const [conceptId, questionIds] of Object.entries(CONCEPT_CONFIG)) {
-    let sum = 0;
-    let count = 0;
-
-    for (const qId of questionIds) {
-      const s = itemScores[qId];
-      if (typeof s === 'number') {
-        sum += s;
-        count += 1;
-      }
-    }
-    conceptScores[conceptId] = count > 0 ? sum / count : 0;
-  }
-  return conceptScores;
-}
-
-
-/** Compute fuzzy LOW/AVG/HIGH for each concept */
-function computeFuzzyProfile(conceptScores) {
-  const profile = {};
-
-  for (const [conceptId, score] of Object.entries(conceptScores)) {
-    const low = lowMembership(score);
-    const avg = averageMembership(score);
-    const high = highMembership(score);
-
-    const max = Math.max(low, avg, high);
-    let label = 'LOW';
-    if (max === high) label = 'HIGH';
-    else if (max === avg) label = 'AVERAGE';
-
-    profile[conceptId] = { score, low, avg, high, label };
-  }
-
-  return profile;
-}
-
 const { getImageURL } = useAssetUrl();
 
 const props = defineProps({
-  mode: { type: String, default: 'pre' }, // 'pre' | 'post'
+  mode: { type: String, default: "pre" }, // 'pre' | 'post'
   questionListProp: { type: Array, default: () => [] },
 });
 
-const step = ref('practice'); // 'practice' | 'summary'
+const step = ref("practice"); // 'practice' | 'summary'
 
 // ใช้ question list จาก prop หรือ default
 const questionList = computed(() =>
-  props.questionListProp.length ? props.questionListProp : defaultQuestions,
+  props.questionListProp.length ? props.questionListProp : defaultQuestions
 );
 
 const currentIndex = ref(0);
 const question = computed(() => questionList.value[currentIndex.value]);
 
 // ---------- TIMER (60 MINUTES) ----------
-const { timeLeftText, isTimeUp, startedAtMs, endAtMs } = useCountdown(60 * 60, {
-  storageKey: `test_timer_${props.mode}`, // ✅ persists per mode
+const MAIN_SECONDS = 60 * 60;
+const GRACE_SECONDS = 5 * 60;
+
+const {
+  timeLeftText,
+  isMainTimeUp,
+  isFinalTimeUp,
+  isInGrace,
+  startedAtMs,
+  finalEndAtMs,
+  clearStorage,
+} = useCountdown(MAIN_SECONDS, GRACE_SECONDS, {
+  storageKey: `test_timer_${props.mode}`,
   onFinished() {
-    step.value = "summary";
+    // final deadline reached => auto-submit with missing=0
+    autoSubmitWithMissingAsZero();
   },
 });
 
-// ใช้ timestamp ง่าย ๆ สำหรับคำนวณ timeUsedSeconds (ไม่ต้องไปยุ่งกับ useCountdown ภายใน)
-// const startedAt = ref(Date.now());
-// onMounted(() => {
-//   startedAt.value = Date.now();
-// });
-// ----------------------------------------
+watch(
+  isMainTimeUp,
+  (up) => {
+    if (up) {
+      step.value = "summary";
+    }
+  },
+  { immediate: true }
+);
 
-// allAnswers = { '1': { '1.1': 'a', '1.2': 'confident', ... }, '2': {...}, ... }
+const autoSubmitLocked = ref(false);
+
+async function autoSubmitWithMissingAsZero() {
+  if (autoSubmitLocked.value) return;
+  autoSubmitLocked.value = true;
+
+  // If user already submitted manually before final deadline, don't double-submit:
+  // (Better: also enforce on server by checking if tests/pre already exists)
+  try {
+    const finishedAt = Date.now();
+    const filledAnswers = buildAnswersWithMissingFilled();
+
+    await $fetch(`/api/tests/${props.mode}`, {
+      method: "POST",
+      body: {
+        answers: filledAnswers,
+        startedAt: startedAtMs.value,
+        finishedAt,
+        timeUsedSeconds: Math.max(
+          0,
+          Math.round((finishedAt - startedAtMs.value) / 1000)
+        ),
+        autoSubmitted: true, // optional flag for teacher
+      },
+    });
+
+    await $fetch("/api/progress", {
+      method: "POST",
+      body:
+        props.mode === "pre" ? { preTestDone: true } : { postTestDone: true },
+    });
+
+    clearStorage(); // prevent re-auto-submit on refresh
+
+    alert("หมดเวลา ระบบส่งแบบทดสอบอัตโนมัติแล้ว");
+
+    await navigateTo(props.mode === "pre" ? "/srm" : `/fuzzy-result?mode=post`);
+  } catch (err) {
+    console.error("❌ auto submit failed:", err);
+    // fallback: keep them on summary; they can refresh and it will retry when computeRemaining runs
+    autoSubmitLocked.value = false;
+  }
+}
+
 const allAnswers = ref({});
 
-// ensure slot for current question exists
 watch(
   question,
   (q) => {
@@ -302,15 +199,17 @@ watch(
       allAnswers.value[q.id] = {};
     }
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 const modeLabel = computed(() =>
-  props.mode === 'post' ? 'หลังเรียน' : 'ก่อนเรียน',
+  props.mode === "post" ? "หลังเรียน" : "ก่อนเรียน"
 );
 
 const isFirst = computed(() => currentIndex.value === 0);
-const isLast = computed(() => currentIndex.value === questionList.value.length - 1);
+const isLast = computed(
+  () => currentIndex.value === questionList.value.length - 1
+);
 
 const validateCurrentQuestion = () => {
   const q = question.value;
@@ -327,17 +226,12 @@ const validateCurrentQuestion = () => {
   return true;
 };
 
-const goPrev = async () => {
-  if (isTimeUp.value) return;
-  if (isFirst.value) return;
-  currentIndex.value -= 1;
-
-  await scrollTop();
-};
-
 const backToPractice = () => {
-  if (isTimeUp.value) return;
-  step.value = 'practice';
+  // allow only during grace
+  if (!isInGrace.value) return;
+
+  step.value = "practice";
+  // jump to last question or first missing (your choice)
   currentIndex.value = questionList.value.length - 1;
 };
 
@@ -388,9 +282,30 @@ const goToFirstMissing = () => {
   const idx = questionList.value.findIndex((q) => q.id === first.questionId);
   if (idx !== -1) {
     currentIndex.value = idx;
-    step.value = 'practice';
+    step.value = "practice";
   }
 };
+
+function buildAnswersWithMissingFilled() {
+  // deep clone so we don't mutate UI state unexpectedly
+  const filled = JSON.parse(JSON.stringify(allAnswers.value || {}));
+
+  for (const q of questionList.value) {
+    const qid = q.id;
+    if (!filled[qid]) filled[qid] = {};
+
+    for (const sec of q.sections) {
+      const sid = sec.id;
+      if (!filled[qid][sid]) {
+        // choose what "0" means for your UI:
+        // - multiple choice: "" or "0"
+        // - confidence: "not_confident" maybe
+        filled[qid][sid] = ""; // treat as missing => wrong
+      }
+    }
+  }
+  return filled;
+}
 
 const submitAll = async () => {
   const finishedAt = Date.now();
@@ -399,8 +314,13 @@ const submitAll = async () => {
     answers: allAnswers.value,
     startedAt: startedAtMs.value,
     finishedAt,
-    timeUsedSeconds: Math.max(0, Math.round((finishedAt - startedAtMs.value) / 1000)),
+    timeUsedSeconds: Math.max(
+      0,
+      Math.round((finishedAt - startedAtMs.value) / 1000)
+    ),
   };
+
+  console.log("Submitting test payload:", payload);
 
   try {
     const res = await $fetch(`/api/tests/${props.mode}`, {
@@ -411,9 +331,8 @@ const submitAll = async () => {
     // ✅ set correct flag based on mode
     await $fetch("/api/progress", {
       method: "POST",
-      body: props.mode === "pre"
-        ? { preTestDone: true }
-        : { postTestDone: true },
+      body:
+        props.mode === "pre" ? { preTestDone: true } : { postTestDone: true },
     });
 
     alert("บันทึกผลแบบทดสอบเรียบร้อยแล้ว");
@@ -422,7 +341,9 @@ const submitAll = async () => {
     const { data: me } = await useFetch("/api/auth/me");
     const group = me.value?.experimentGroup ?? "A";
 
-    await router.push(props.mode === "pre" ? "/srm" : `/fuzzy-result?mode=post`);
+    await router.push(
+      props.mode === "pre" ? "/srm" : `/fuzzy-result?mode=post`
+    );
   } catch (err) {
     console.error("❌ submit test failed:", err);
     alert("บันทึกผลแบบทดสอบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");
@@ -430,24 +351,30 @@ const submitAll = async () => {
 };
 
 const submitFromSummary = () => {
-  if (!isAllAnswered.value && typeof window !== 'undefined') {
+  if (isFinalTimeUp.value) return;
+
+  if (!isAllAnswered.value && typeof window !== "undefined") {
     const ok = window.confirm(
-      'ยังมีข้อที่ยังไม่ได้ตอบ ต้องการส่งแบบทดสอบเลยหรือไม่?',
+      "ยังมีข้อที่ยังไม่ได้ตอบ ต้องการส่งแบบทดสอบเลยหรือไม่?"
     );
     if (!ok) return;
   }
   submitAll();
 };
 
+const goPrev = async () => {
+  if (isFinalTimeUp.value) return;
+  if (isFirst.value) return;
+  currentIndex.value -= 1;
+  await scrollTop();
+};
+
 const goNext = async () => {
-  if (isTimeUp.value) return;
+  if (isFinalTimeUp.value) return;
   if (!validateCurrentQuestion()) return;
 
-  if (!isLast.value) {
-    currentIndex.value += 1;
-  } else {
-    step.value = 'summary';
-  }
+  if (!isLast.value) currentIndex.value += 1;
+  else step.value = "summary";
 
   await scrollTop();
 };

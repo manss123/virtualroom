@@ -2,7 +2,6 @@ import { ref, computed, onMounted, onUnmounted } from "vue";
 
 type Options = {
   onFinished?: () => void;
-  // optional: store key to persist across refresh
   storageKey?: string;
 };
 
@@ -14,84 +13,98 @@ function formatHHMMSS(totalSeconds: number) {
   return `${hh}:${mm}:${ss}`;
 }
 
-export function useCountdown(durationSeconds: number, options: Options = {}) {
-  const remainingSeconds = ref(durationSeconds);
-  const isTimeUp = computed(() => remainingSeconds.value <= 0);
+type Persisted = {
+  startedAtMs: number;
+  mainEndAtMs: number;
+  finalEndAtMs: number; // main + grace
+};
+
+export function useCountdown(
+  mainSeconds: number,
+  graceSeconds: number,
+  options: Options = {}
+) {
+  const remainingSeconds = ref(mainSeconds);
   const timeLeftText = computed(() => formatHHMMSS(remainingSeconds.value));
 
-  // We use a hard end timestamp so throttling doesn't matter
   const startedAtMs = ref<number>(Date.now());
-  const endAtMs = ref<number>(Date.now() + durationSeconds * 1000);
+  const mainEndAtMs = ref<number>(Date.now() + mainSeconds * 1000);
+  const finalEndAtMs = ref<number>(
+    Date.now() + (mainSeconds + graceSeconds) * 1000
+  );
+
+  const nowMs = ref(Date.now());
+
+  const isMainTimeUp = computed(() => nowMs.value >= mainEndAtMs.value);
+  const isFinalTimeUp = computed(() => nowMs.value >= finalEndAtMs.value);
+  const isInGrace = computed(() => isMainTimeUp.value && !isFinalTimeUp.value);
 
   let rafId: number | null = null;
   let intervalId: number | null = null;
-  let finishedCalled = false;
+  let mainFinishedCalled = false;
+  let finalFinishedCalled = false;
 
   function loadPersisted() {
-    if (!options.storageKey) return;
-
+    if (!options.storageKey) return null;
     const raw = localStorage.getItem(options.storageKey);
-    if (!raw) return;
-
+    if (!raw) return null;
     try {
-      const parsed = JSON.parse(raw);
-      if (typeof parsed?.endAtMs === "number" && typeof parsed?.startedAtMs === "number") {
-        startedAtMs.value = parsed.startedAtMs;
-        endAtMs.value = parsed.endAtMs;
-      }
+      return JSON.parse(raw) as Persisted;
     } catch {
-      // ignore
+      return null;
     }
   }
 
   function persist() {
     if (!options.storageKey) return;
-    localStorage.setItem(
-      options.storageKey,
-      JSON.stringify({ startedAtMs: startedAtMs.value, endAtMs: endAtMs.value })
-    );
+    const payload: Persisted = {
+      startedAtMs: startedAtMs.value,
+      mainEndAtMs: mainEndAtMs.value,
+      finalEndAtMs: finalEndAtMs.value,
+    };
+    localStorage.setItem(options.storageKey, JSON.stringify(payload));
   }
 
   function computeRemaining() {
     const now = Date.now();
-    const diff = Math.ceil((endAtMs.value - now) / 1000);
+    nowMs.value = now;
+
+    const diff = Math.ceil((finalEndAtMs.value - now) / 1000);
     remainingSeconds.value = Math.max(0, diff);
 
-    if (!finishedCalled && remainingSeconds.value <= 0) {
-      finishedCalled = true;
+    if (!finalFinishedCalled && now >= finalEndAtMs.value) {
+      finalFinishedCalled = true;
       options.onFinished?.();
     }
   }
 
-  // For smooth UI updates while visible
   function tickRaf() {
     computeRemaining();
     rafId = requestAnimationFrame(tickRaf);
   }
 
   function start() {
-    finishedCalled = false;
+    mainFinishedCalled = false;
+    finalFinishedCalled = false;
 
-    // If persisted, use it; otherwise set fresh
-    loadPersisted();
-    // If nothing persisted, init
-    if (!options.storageKey || !localStorage.getItem(options.storageKey)) {
+    const persisted = loadPersisted();
+    if (persisted) {
+      startedAtMs.value = persisted.startedAtMs;
+      mainEndAtMs.value = persisted.mainEndAtMs;
+      finalEndAtMs.value = persisted.finalEndAtMs;
+    } else {
       startedAtMs.value = Date.now();
-      endAtMs.value = startedAtMs.value + durationSeconds * 1000;
+      mainEndAtMs.value = startedAtMs.value + mainSeconds * 1000;
+      finalEndAtMs.value =
+        startedAtMs.value + (mainSeconds + graceSeconds) * 1000;
       persist();
     }
 
     computeRemaining();
 
-    // Use RAF while visible (smooth), and an interval fallback (1s) for hidden states
     rafId = requestAnimationFrame(tickRaf);
+    intervalId = window.setInterval(computeRemaining, 1000);
 
-    intervalId = window.setInterval(() => {
-      // Interval might be throttled — but when it runs again it will “catch up”
-      computeRemaining();
-    }, 1000);
-
-    // When tab becomes visible again, instantly recompute
     const onVis = () => computeRemaining();
     document.addEventListener("visibilitychange", onVis);
 
@@ -100,11 +113,14 @@ export function useCountdown(durationSeconds: number, options: Options = {}) {
     });
   }
 
-  function reset(newDurationSeconds = durationSeconds) {
+  function reset() {
     startedAtMs.value = Date.now();
-    endAtMs.value = startedAtMs.value + newDurationSeconds * 1000;
-    remainingSeconds.value = newDurationSeconds;
-    finishedCalled = false;
+    mainEndAtMs.value = startedAtMs.value + mainSeconds * 1000;
+    finalEndAtMs.value =
+      startedAtMs.value + (mainSeconds + graceSeconds) * 1000;
+    remainingSeconds.value = mainSeconds + graceSeconds;
+    mainFinishedCalled = false;
+    finalFinishedCalled = false;
     persist();
   }
 
@@ -115,16 +131,28 @@ export function useCountdown(durationSeconds: number, options: Options = {}) {
     intervalId = null;
   }
 
+  function clearStorage() {
+    if (!options.storageKey) return;
+    localStorage.removeItem(options.storageKey);
+  }
+
   onMounted(start);
   onUnmounted(stop);
 
   return {
     timeLeftText,
     remainingSeconds,
-    isTimeUp,
+
     startedAtMs,
-    endAtMs,
+    mainEndAtMs,
+    finalEndAtMs,
+
+    isMainTimeUp,
+    isFinalTimeUp,
+    isInGrace,
+
     reset,
     stop,
+    clearStorage,
   };
 }

@@ -27,10 +27,12 @@ export default defineEventHandler(async (event) => {
       ? await adminAuth.verifySessionCookie(token, true)
       : decodeJwtPayload(token);
   } catch (error) {
-    console.error("[POST /api/tests/[mode]] verifySessionCookie failed:", error);
+    console.error(
+      "[POST /api/tests/[mode]] verifySessionCookie failed:",
+      error
+    );
     throw createError({ statusCode: 401, statusMessage: "Unauthenticated" });
   }
-
 
   const uid = decoded.uid || decoded.user_id;
 
@@ -72,15 +74,20 @@ export default defineEventHandler(async (event) => {
   // }
 
   // ---------- save to Firestore ----------
-  await adminDb
+  const testRef = adminDb
     .collection("students")
     .doc(uid)
     .collection("tests")
-    .doc(mode)
-    .set({
-      ...result,
-      createdAt: FieldValue.serverTimestamp(),
-    });
+    .doc(mode);
+  const existing = await testRef.get();
+  if (existing.exists) {
+    return { ok: true, alreadySubmitted: true };
+  }
+
+  await testRef.set({
+    ...result,
+    createdAt: FieldValue.serverTimestamp(),
+  });
 
   return {
     ok: true,

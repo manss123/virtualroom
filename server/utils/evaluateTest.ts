@@ -32,8 +32,8 @@ const TIER_CODE: Record<string, string> = {
   "0000": "LK4",
 };
 
-function classifyFromFlags(D: number, F: number, E: number, G: number): string {
-  const key = `${D}${F}${E}${G}`;
+function classifyFromFlags(D: number, E: number, F: number, G: number): string {
+  const key = `${D}${E}${F}${G}`;
   return TIER_CODE[key] ?? "LK4";
 }
 
@@ -43,10 +43,10 @@ function computeFlagsForQuestion(
   qAnswers: Record<string, string>
 ) {
   const baseId = String(question.id); // e.g. 1
-  const id1 = `${baseId}.1`; // 1.1
-  const id2 = `${baseId}.2`; // 1.2 (confidence)
-  const id3 = `${baseId}.3`; // 1.3
-  const id4 = `${baseId}.4`; // 1.4 (confidence)
+  const id1 = `${baseId}.1`; // correctness
+  const id2 = `${baseId}.2`; // confidence
+  const id3 = `${baseId}.3`; // correctness
+  const id4 = `${baseId}.4`; // confidence
 
   const ans1 = qAnswers[id1];
   const ans3 = qAnswers[id3];
@@ -56,10 +56,16 @@ function computeFlagsForQuestion(
   const correct1 = prePostTestAnswerKey[id1];
   const correct3 = prePostTestAnswerKey[id3];
 
+  // D = correct of 1.1
   const D = correct1 ? (ans1 === correct1 ? 1 : 0) : 0;
-  const E = correct3 ? (ans3 === correct3 ? 1 : 0) : 0;
 
-  const F = conf1 === "confident" ? 1 : 0;
+  // E = confidence of 1.2
+  const E = conf1 === "confident" ? 1 : 0;
+
+  // F = correct of 1.3
+  const F = correct3 ? (ans3 === correct3 ? 1 : 0) : 0;
+
+  // G = confidence of 1.4
   const G = conf3 === "confident" ? 1 : 0;
 
   return { D, E, F, G };
@@ -224,7 +230,7 @@ export function evaluateTest(params: EvaluateParams) {
     // ---- question-level D,E,F,G + tier code ----
     const flags = computeFlagsForQuestion(q, qAnswers);
     const { D, E, F, G } = flags;
-    const code = classifyFromFlags(D, F, E, G);
+    const code = classifyFromFlags(D, E, F, G);
     const score = CODE_SCORE[code];
 
     flagsByQuestionId[q.id] = flags;

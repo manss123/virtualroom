@@ -68,14 +68,20 @@
 
 <script setup>
 const props = defineProps({
-    modeLabel: { type: String, default: '' }, // ก่อนเรียน/หลังเรียน
-    kindLabel: { type: String, default: 'แบบทดสอบ' }, // หรือ "แบบประเมิน"
+    modeLabel: { type: String, default: "" },
+    kindLabel: { type: String, default: "แบบทดสอบ" },
     isAllAnswered: { type: Boolean, required: true },
     missingQuestions: { type: Array, default: () => [] },
-    isTimeUp: { type: Boolean, default: false },
+
+    // NEW
+    isMainTimeUp: { type: Boolean, default: false },
+    isFinalTimeUp: { type: Boolean, default: false },
+    isInGrace: { type: Boolean, default: false },
+
     happyImage: { type: String, required: true },
     confusedImage: { type: String, required: true },
 });
+
 
 const emit = defineEmits(['back', 'goToFirstMissing', 'submit']);
 </script>
