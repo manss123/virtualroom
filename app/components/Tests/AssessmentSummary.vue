@@ -1,5 +1,5 @@
 <template>
-    <div class="relative w-full flex items-center justify-center pl-[20%]">
+    <div class="relative w-full flex flex-col lg:flex-row items-center justify-center pl-0 lg:pl-[20%]">
         <div class="w-full max-w-[1024px]">
             <div class="w-full flex">
                 <div
@@ -60,7 +60,7 @@
         </div>
 
         <!-- รูปภาพด้านซ้าย -->
-        <div class="absolute left-[14%] flex w-fit h-full items-center justify-end">
+        <div class="block lg:absolute left-[14%] flex w-fit h-full items-center justify-end">
             <img class="w-auto h-full pointer-events-none" :src="isAllAnswered ? happyImage : confusedImage" alt="" />
         </div>
     </div>

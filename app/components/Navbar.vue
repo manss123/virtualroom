@@ -1,76 +1,174 @@
 <template>
-  <ClientOnly >
-    <div class="flex bg-[#FFC233] w-full h-[70px] items-center justify-between px-[45px] fixed top-0 z-50">
-      <NuxtLink class="text-[#342F35] text-xl font-bold" to="/">
-        Engineer Gear-Train
-      </NuxtLink>
-  
-      <!-- Center links -->
-      <div class="ml-auto flex items-center gap-10 font-medium text-[#342F35]">
-        <!-- Not logged in -->
-        <template v-if="authStatus !== 'authed'">
-          <NuxtLink to="/" class="hover:underline">Sign in</NuxtLink>
-        </template>
-  
-        <!-- Logged in -->
-        <template v-else>
-          <NuxtLink v-if="me?.email === 'chinapat2535@gmail.com' || me?.email === 'monamorn.research@gmail.com' || me?.email === 'virtual360room@gmail.com'" to="/teacher/dashboard" class="hover:underline">
-            Student Report
-          </NuxtLink>
-          <!-- Virtual Room: show only if NOT post-test done -->
-          <NuxtLink v-if="!postTestDone" to="/welcome" class="hover:underline">
-            Virtual 360° Room
-          </NuxtLink>
-  
-          <!-- If you prefer "disabled" instead of hidden: -->
-          <span v-else class="opacity-50 cursor-not-allowed select-none"
-            title="ทำ Post-test แล้ว จึงไม่สามารถเข้าเรียนซ้ำได้">
-            Virtual 360° Room
-          </span>
-  
-  
-          <NuxtLink to="/dashboard" class="hover:underline">
-            My Dashboard
-          </NuxtLink>
-  
-          <!-- User name -->
-          <span class="hidden md:inline opacity-80">
-            {{ displayName }}
-          </span>
-  
-          <!-- Logout -->
-          <button class="px-4 py-2 rounded-lg bg-[#342F35] text-white hover:opacity-90 cursor-pointer"
-            :disabled="logoutPending" @click="logout">
-            {{ logoutPending ? "..." : "Logout" }}
-          </button>
-        </template>
+  <ClientOnly>
+    <div class="bg-[#FFC233] w-full fixed top-0 z-50 shadow-md">
+
+      <!-- Top bar -->
+      <div class="flex h-[70px] items-center justify-between px-5 md:px-[45px]">
+
+        <!-- Logo -->
+        <NuxtLink class="text-[#342F35] text-xl font-bold" to="/">
+          Engineer Gear-Train
+        </NuxtLink>
+
+        <!-- Desktop Menu -->
+        <div class="hidden lg:flex items-center gap-10 font-medium text-[#342F35]">
+          <template v-if="authStatus !== 'authed'">
+            <NuxtLink to="/" class="hover:underline">Sign in</NuxtLink>
+          </template>
+
+          <template v-else>
+            <NuxtLink
+              v-if="isTeacher"
+              to="/teacher/dashboard"
+              class="hover:underline"
+            >
+              Student Report
+            </NuxtLink>
+
+            <NuxtLink
+              v-if="!postTestDone"
+              to="/welcome"
+              class="hover:underline"
+            >
+              Virtual 360° Room
+            </NuxtLink>
+
+            <span
+              v-else
+              class="opacity-50 cursor-not-allowed select-none"
+              title="ทำ Post-test แล้ว"
+            >
+              Virtual 360° Room
+            </span>
+
+            <NuxtLink to="/dashboard" class="hover:underline">
+              My Dashboard
+            </NuxtLink>
+
+            <span class="opacity-80">
+              {{ displayName }}
+            </span>
+
+            <button
+              class="px-4 py-2 rounded-lg bg-[#342F35] text-white hover:opacity-90"
+              :disabled="logoutPending"
+              @click="logout"
+            >
+              {{ logoutPending ? "..." : "Logout" }}
+            </button>
+          </template>
+        </div>
+
+        <!-- Mobile Hamburger Button -->
+        <button
+          class="lg:hidden text-[#342F35]"
+          @click="mobileOpen = !mobileOpen"
+        >
+          <!-- icon -->
+          <svg v-if="!mobileOpen" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-8 w-8"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
       </div>
+
+      <!-- Mobile Dropdown Menu -->
+      <transition name="slide">
+        <div
+          v-if="mobileOpen"
+          class="lg:hidden flex flex-col bg-[#FFC233] border-t border-[#e5b91f] px-6 py-4 space-y-4 text-[#342F35] font-medium"
+        >
+          <template v-if="authStatus !== 'authed'">
+            <NuxtLink @click="closeMobile" to="/">Sign in</NuxtLink>
+          </template>
+
+          <template v-else>
+            <NuxtLink v-if="isTeacher" @click="closeMobile" to="/teacher/dashboard">
+              Student Report
+            </NuxtLink>
+
+            <NuxtLink v-if="!postTestDone" @click="closeMobile" to="/welcome">
+              Virtual 360° Room
+            </NuxtLink>
+
+            <span v-else class="opacity-50">
+              Virtual 360° Room
+            </span>
+
+            <NuxtLink @click="closeMobile" to="/dashboard">
+              My Dashboard
+            </NuxtLink>
+
+            <div class="text-sm opacity-70">
+              {{ displayName }}
+            </div>
+
+            <button
+              class="w-full text-left px-3 py-2 rounded bg-[#342F35] text-white"
+              @click="logout"
+            >
+              Logout
+            </button>
+          </template>
+        </div>
+      </transition>
+
     </div>
   </ClientOnly>
 </template>
 
 <script setup lang="ts">
-import { useAuthState } from '~/composables/useAuthState';
+import { useAuthState } from '~/composables/useAuthState'
 
-const { authStatus, displayName, postTestDone, refreshAuth, clearAuth, me } = useAuthState();
+const { authStatus, displayName, postTestDone, refreshAuth, clearAuth, me } = useAuthState()
 
-const logoutPending = ref(false);
+const logoutPending = ref(false)
+const mobileOpen = ref(false)
 
-console.log(me.value)
+const isTeacher = computed(() => {
+  const email = me.value?.email || ""
+  return [
+    "chinapat2535@gmail.com",
+    "monamorn.research@gmail.com",
+    "virtual360room@gmail.com"
+  ].includes(email)
+})
+
+function closeMobile() {
+  mobileOpen.value = false
+}
 
 async function logout() {
   try {
-    logoutPending.value = true;
-    await $fetch("/api/auth/logout", { method: "POST" });
-    clearAuth();          // instant UI update
-    await navigateTo("/");
+    logoutPending.value = true
+    await $fetch("/api/auth/logout", { method: "POST" })
+    clearAuth()
+    mobileOpen.value = false
+    await navigateTo("/")
   } finally {
-    logoutPending.value = false;
+    logoutPending.value = false
   }
 }
 
-// Optional: ensure navbar loads state when app starts
 onMounted(() => {
-  refreshAuth();
-});
+  refreshAuth()
+})
 </script>
+<style scoped>
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.25s ease;
+}
+.slide-enter-from,
+.slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>

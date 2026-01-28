@@ -3,7 +3,7 @@
     <!-- PRE: keep original UI     -->
     <!-- ========================= -->
     <template v-if="mode === 'pre'">
-        <div class="relative w-full flex h-full items-center justify-center pl-[20%]">
+        <div class="relative w-full flex flex-col lg:flex-row h-full items-center justify-center px-5 lg:pl-[20%] mt-10">
             <div class="w-full max-w-5xl">
                 <div class="w-full flex">
                     <div
@@ -22,7 +22,7 @@
                     </div>
 
                     <!-- GROUP B: SCORE FEEDBACK (pre) -->
-                    <div v-if="isGroupB" class="w-full mt-8 px-10">
+                    <div v-if="isGroupB && mode === 'post'" class="w-full mt-8 px-10">
                         <div class="text-[30px] text-[#342F35] text-center font-semibold">
                             ได้คะแนน {{ totalScore }}/119 คะแนน
                         </div>
@@ -67,7 +67,7 @@
             </div>
 
             <!-- left image -->
-            <div class="absolute left-0 3xl:left-[14%] flex w-fit h-full items-center justify-end">
+            <div class="block lg:absolute left-0 3xl:left-[14%] flex w-fit h-full items-center justify-end">
                 <img class="w-auto h-auto pointer-events-none" :src="getImageURL('images/cartoons/gear-wow.png')" />
             </div>
         </div>

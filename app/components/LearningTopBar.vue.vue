@@ -2,7 +2,7 @@
 <template>
   <!-- wrapper is pointer-events-none so dragging still works on panorama -->
   <div
-    class="pointer-events-none absolute top-0 left-0 right-0 z-40 flex justify-center mt-24 px-4"
+    class="pointer-events-none top-0 left-0 right-0 z-40 flex justify-center mt-24 px-4" :class="[isBlocked? 'block w-full': 'absolute',]"
   >
     <div class="w-full max-w-[90vw] flex flex-col items-center gap-4">
       <!-- Time Left & Exit Button Row -->
@@ -22,7 +22,7 @@
         <!-- RIGHT: exit button -->
         <div class="pointer-events-auto flex justify-end flex-1">
           <button
-            class="px-4 py-2 rounded-full bg-white/90 text-black text-xl md:text-[26px] font-medium hover:bg-white"
+            class="px-4 py-2 rounded-full bg-white/90 text-black text-xs md:text-[26px] font-medium hover:bg-white"
             @click="goExit"
           >
             ออกจากห้องเรียน
@@ -67,6 +67,7 @@ const props = defineProps<{
   exitTo?: string;
   progressMode?: "time" | "room";
   roomProgress?: { done: number; total: number } | null;
+  isBlocked?: boolean;
 }>();
 
 const router = useRouter();

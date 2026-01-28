@@ -6,11 +6,11 @@
       :right-icon="getImageURL('images/cartoons/gear-time.png')" />
 
     <!-- MAIN QUESTION + BLOCKS -->
-    <div v-if="step === 'practice'">
+    <div v-if="step === 'practice'" class="w-full">
       <div v-if="question" class="w-full flex flex-col items-center justify-start mt-5">
         <div class="w-full flex">
           <div
-            class="flex flex-1 items-center justify-center w-[120px] max-w-[120px] min-h-[120px] rounded-nw bg-white text-black text-[52px] shadow-md shadow-[#FFC233]">
+            class="flex flex-1 items-center justify-center max-w-3/12 lg:w-[120px] lg:max-w-[120px] min-h-[120px] rounded-nw bg-white text-black text-[52px] shadow-md shadow-[#FFC233]">
             {{ question.mainNumber }}
           </div>
           <div
@@ -19,14 +19,14 @@
               {{ question.mainText }}
             </div>
             <div v-if="question.mainImage" class="w-full h-fit flex items-center justify-center">
-              <img class="max-w-[980px] h-auto rounded-nw cursor-zoom-in" :src="getImageURL(question.mainImage)" alt=""
+              <img class="w=full lg:max-w-[980px] h-auto rounded-nw cursor-zoom-in" :src="getImageURL(question.mainImage)" alt=""
                 @click="openZoom(getImageURL(question.mainImage))" />
             </div>
           </div>
         </div>
 
         <div
-          class="relative w-full flex flex-col shadow shadow-[#FFC233] rounded-nw bg-white text-black text-[24px] py-14 px-20 gap-6">
+          class="relative w-full flex flex-col shadow shadow-[#FFC233] rounded-nw bg-white text-black text-[24px] py-10 px-5 lg:py-14 lg:px-20 gap-6">
           <!-- all sections of current question -->
           <QuestionBlock v-for="section in question.sections" :key="section.id" :block="section"
             v-model="allAnswers[question.id][section.id]" />
@@ -115,6 +115,10 @@ const questionList = computed(() =>
 const currentIndex = ref(0);
 const question = computed(() => questionList.value[currentIndex.value]);
 
+const { data: me } = await useFetch("/api/auth/me");
+const uid = me.value?.id || me.value?.email || "anon";
+
+
 // ---------- TIMER (60 MINUTES) ----------
 const MAIN_SECONDS = 60 * 60;
 const GRACE_SECONDS = 5 * 60;
@@ -128,7 +132,7 @@ const {
   finalEndAtMs,
   clearStorage,
 } = useCountdown(MAIN_SECONDS, GRACE_SECONDS, {
-  storageKey: `test_timer_${props.mode}`,
+  storageKey: `test_timer_${props.mode}_${uid}`,
   onFinished() {
     // final deadline reached => auto-submit with missing=0
     autoSubmitWithMissingAsZero();
@@ -334,6 +338,9 @@ const submitAll = async () => {
       body:
         props.mode === "pre" ? { preTestDone: true } : { postTestDone: true },
     });
+
+    clearStorage();
+    autoSubmitLocked.value = true;
 
     alert("บันทึกผลแบบทดสอบเรียบร้อยแล้ว");
 

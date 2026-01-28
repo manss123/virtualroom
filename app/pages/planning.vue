@@ -14,7 +14,7 @@
 
       <!-- PLAN TABLE -->
       <div
-        class="w-full bg-white rounded-nw shadow-md shadow-[#FFC233] px-8 pt-8 pb-16 text-black mb-10"
+        class="w-full bg-white rounded-nw shadow-md shadow-[#FFC233] px-3 lg:px-8 pt-8 pb-16 text-black mb-10"
       >
         <!-- table header -->
         <div
@@ -32,7 +32,7 @@
           class="grid grid-cols-3 gap-4 items-center py-2"
         >
           <div
-            class="flex items-center gap-3 text-center text-[20px] justify-center"
+            class="flex items-center gap-1 lg:gap-3 text-center text-sm lg:text-[20px] justify-center"
           >
             <!-- small color dot -->
             <span
@@ -48,24 +48,24 @@
           </div>
 
           <!-- start date -->
-           <div class="flex justify-center">
-               <input
-                 type="date"
-                 v-model="room.startDate"
-                 :min="todayISO"
-                 class="w-40 h-11 px-3 rounded-[10px] bg-[#E5F0F4] border border-gray-300 text-center text-sm"
-               />
-           </div>
+          <div class="flex justify-center">
+            <input
+              type="date"
+              v-model="room.startDate"
+              :min="todayISO"
+              class="w-full lg:w-40 h-11 px-3 rounded-[10px] bg-[#E5F0F4] border border-gray-300 text-center text-sm"
+            />
+          </div>
 
           <!-- end date -->
-           <div class="flex justify-center">
-               <input
-                 type="date"
-                 v-model="room.endDate"
-                 :min="room.startDate || todayISO"
-                 class="w-40 h-11 px-3 rounded-[10px] bg-[#E5F0F4] border border-gray-300 text-center text-sm"
-               />
-           </div>
+          <div class="flex justify-center">
+            <input
+              type="date"
+              v-model="room.endDate"
+              :min="room.startDate || todayISO"
+              class="w-full lg:w-40 h-11 px-3 rounded-[10px] bg-[#E5F0F4] border border-gray-300 text-center text-sm"
+            />
+          </div>
         </div>
 
         <!-- validation message -->
@@ -119,7 +119,6 @@
 
           <!-- days -->
           <div class="grid grid-cols-7 text-center text-sm">
-            <
             <div
               v-for="(day, index) in calendarDays"
               :key="index"
@@ -213,7 +212,7 @@
         <button
           type="button"
           class="flex w-[260px] h-[60px] justify-center items-center text-[22px] bg-[#FFC233] hover:bg-[#B97530] text-black hover:text-white drop-shadow-xl rounded-[15px] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-          :disabled="saving || isOverMaxDays"
+          :disabled="saving || isOverMaxDays || !isPlanComplete"
           @click="savePlan"
         >
           {{ saving ? "กำลังบันทึก..." : "บันทึกตารางเรียน" }}
@@ -222,6 +221,12 @@
 
       <div v-if="saveSuccess" class="mt-4 text-center text-green-200">
         บันทึกตารางเรียนเรียบร้อยแล้ว
+      </div>
+      <div
+        v-if="!isPlanComplete && !errorMessage"
+        class="mt-2 text-xs text-gray-700 text-center"
+      >
+        * กรุณากำหนดวันเริ่ม-จบให้ครบทุกห้องก่อนบันทึก
       </div>
     </div>
   </div>
@@ -313,9 +318,14 @@ const errorMessage = ref<string | null>(null);
 
 // build rooms when data arrives
 watchEffect(() => {
-  if (!data.value || !data.value.learningPath) return;
+  if (!data.value) return;
 
-  const lp = data.value.learningPath as RawLearningPathItem[];
+  const lp = data.value.learningPath as RawLearningPathItem[] | undefined;
+  if (!lp) {
+    errorMessage.value = "ยังไม่พบผล Pre-test กรุณาทำแบบทดสอบก่อนวางแผน";
+    router.push("/pre-test"); // or wherever your pre-test route is
+    return;
+  }
 
   const newRooms: RoomPlan[] = [];
 
@@ -362,12 +372,12 @@ const currentYear = ref(today.getFullYear());
 const monthName = computed(() =>
   new Date(currentYear.value, currentMonth.value, 1).toLocaleString("en-US", {
     month: "long",
-  })
+  }),
 );
 
 // label left (01, 02, ...)
 const currentDayLabel = computed(() =>
-  String(currentMonth.value + 1).padStart(2, "0")
+  String(currentMonth.value + 1).padStart(2, "0"),
 );
 
 function normalize(date: Date) {
@@ -402,7 +412,7 @@ const calendarDays = computed<CalendarCell[]>(() => {
   const daysInMonth = new Date(
     currentYear.value,
     currentMonth.value + 1,
-    0
+    0,
   ).getDate();
 
   // leading cells (previous month)
@@ -410,7 +420,7 @@ const calendarDays = computed<CalendarCell[]>(() => {
     const date = new Date(
       currentYear.value,
       currentMonth.value,
-      i - startWeekday + 1
+      i - startWeekday + 1,
     );
     days.push({
       date,
@@ -464,8 +474,8 @@ function nextMonth() {
 
 const hasOverlappingDay = computed(() =>
   calendarDays.value.some(
-    (day) => day.isCurrentMonth && day.roomsKeys.length > 1
-  )
+    (day) => day.isCurrentMonth && day.roomsKeys.length > 1,
+  ),
 );
 
 // ---------- 3. Overall duration constraint (≤ 30 days) ----------
@@ -494,6 +504,12 @@ const isOverMaxDays = computed(() => overallPlanDays.value > MAX_PLAN_DAYS);
 // ---------- 4. Save learning plan ----------
 const saving = ref(false);
 const saveSuccess = ref(false);
+
+const isPlanComplete = computed(
+  () =>
+    rooms.value.length > 0 &&
+    rooms.value.every((r) => r.startDate && r.endDate),
+);
 
 async function savePlan() {
   errorMessage.value = null;

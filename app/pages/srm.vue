@@ -33,7 +33,7 @@
 
         <!-- ตัวอย่างสเกล 5 ระดับ -->
         <div
-          class="w-full max-w-[1380px] flex items-center justify-between gap-5"
+          class="w-full max-w-[1380px] flex flex-col lg:flex-row items-center justify-between gap-5"
         >
           <div
             v-for="opt in SCALE_OPTIONS"
@@ -69,7 +69,7 @@
           :key="sec.id"
           @click="activeSectionId = sec.id"
           :class="[
-            'w-full text-center rounded-nw shadow-lg shadow-[#FFC233] py-5 text-[26px] font-medium cursor-pointer',
+            'w-full text-center rounded-nw shadow-lg shadow-[#FFC233] py-5 text-lg lg:text-[26px] font-medium cursor-pointer',
             activeSectionId === sec.id
               ? 'bg-white text-black'
               : 'bg-transparent text-white',
@@ -82,7 +82,7 @@
       <!-- เนื้อหาแบบประเมินของ section ปัจจุบัน -->
       <div
         v-if="activeSection"
-        class="w-full flex flex-col items-center justify-start bg-white rounded-nw shadow-lg shadow-[#FFC233] text-black py-20 px-10 gap-10"
+        class="w-full flex flex-col items-center justify-start bg-white rounded-nw shadow-lg shadow-[#FFC233] text-black py-20 px-5 lg:px-10 gap-10"
       >
         <div
           v-for="cat in activeSection.categories"
@@ -91,7 +91,7 @@
         >
           <!-- หัวข้อย่อยใน section -->
           <div
-            class="w-full flex items-center justify-center text-[26px] bg-[#C4C5C54D] rounded-nw shadow-lg py-5 shadow-[#FFC233]"
+            class="w-full flex items-center justify-center text-lg text-center lg:text-left lg:text-[26px] bg-[#C4C5C54D] rounded-nw shadow-lg py-5 shadow-[#FFC233]"
           >
             {{ cat.title }}
           </div>
@@ -106,7 +106,7 @@
               {{ item.globalNo }}. {{ item.text }}
             </div>
             <div
-              class="w-full max-w-[1380px] flex items-center justify-between gap-5"
+              class="w-full max-w-[1380px] flex flex-col lg:flex-row items-center justify-between gap-5"
             >
               <div
                 v-for="opt in SCALE_OPTIONS"
@@ -178,8 +178,11 @@ const props = defineProps({
 /* ---------- STEP ---------- */
 const step = ref("practice");
 
+const { data: me } = await useFetch("/api/auth/me");
+const uid = me.value?.id || me.value?.email || "anon";
+
 /* ---------- TIMER (60 MINUTES) ---------- */
-const MAIN_SECONDS = 60 * 60;
+const MAIN_SECONDS = 20 * 60;
 const GRACE_SECONDS = 5 * 60;
 
 const {
@@ -190,7 +193,7 @@ const {
   startedAtMs,
   clearStorage,
 } = useCountdown(MAIN_SECONDS, GRACE_SECONDS, {
-  storageKey: `srm_timer_${props.mode}`,
+  storageKey: `test_timer_${props.mode}_${uid}`,
   onFinished() {
     // 65 นาทีครบ -> auto submit
     autoSubmitWithMissingAsZero();
@@ -411,6 +414,9 @@ const submitAll = async (opts = {}) => {
       method: "POST",
       body: { questionnaireDone: true },
     });
+
+    clearStorage();
+    autoSubmitLocked.value = true;
 
     // ถ้าเป็น auto-submit ไม่ต้อง alert ก็ได้ แล้วแต่คุณ
     if (!opts.autoSubmitted) {

@@ -2,7 +2,7 @@
   <span class="relative inline-flex" ref="root">
     <!-- Trigger -->
     <button type="button"
-      class="w-6 h-6 rounded-full cursor-pointer border border-[#FFC233] text-[#FFC233] bg-[#342F35] flex items-center justify-center text-xl"
+      class="w-4 h-4 lg:w-6 lg:h-6 rounded-full cursor-pointer border border-[#FFC233] text-[#FFC233] bg-[#342F35] flex items-center justify-center text-xs lg:text-xl"
       @mouseenter="openHover" @mouseleave="closeHover" @click="toggleClick" aria-label="ดูรายละเอียดห้องเรียน">
       !
     </button>

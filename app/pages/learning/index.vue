@@ -1,6 +1,6 @@
 <!-- pages/learning/index.vue -->
 <template>
-  <div class="h-[100vh] w-full overflow-y-auto fixed inset-0">
+  <div class="h-[100vh] w-full overflow-y-auto fixed inset-0 flex flex-col">
     <!-- 360 BG -->
     <ClientOnly>
       <div class="absolute inset-0 -z-10">
@@ -12,9 +12,11 @@
     <div
       class="relative z-10 h-full flex flex-col items-center justify-start lg:justify-center py-8 px-4 text-white bg-black/85">
       <!-- header -->
-      <LearningTopBarVue title="VIRTUAL 360° ROOM" progressMode="time" />
+      <div class="w-full mt-5">
+        <LearningTopBarVue title="VIRTUAL 360° ROOM" progressMode="time" :is-blocked="true" />
+      </div>
 
-      <div class="w-full max-w-6xl text-center mt-[200px] 3xl:mt-0 py-20">
+      <div class="w-full max-w-6xl text-center 3xl:mt-0 py-20">
         <p class="text-center mt-2 text-4xl">
           นักเรียนเลือกห้องเรียนได้เลยครับ
         </p>

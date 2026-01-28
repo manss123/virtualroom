@@ -1,7 +1,7 @@
 <template>
-    <div class="flex w-full h-full text-white items-center justify-center overflow-auto">
+    <div class="flex flex-col lg:flex-row w-full h-full text-white items-center justify-center overflow-auto px-5 lg:px-0">
         <div class="flex w-fit h-full items-center justify-end">
-            <img class="w-auto h-auto" :src="getImageURL('images/cartoons/gear-ghost.png')" alt="">
+            <img class="w-auto max-w-xs lg:max-w-full h-auto" :src="getImageURL('images/cartoons/gear-ghost.png')" alt="">
         </div>
         <div
             class="relative flex flex-col items-center justify-start lg:w-[844px] lg:h-fit bg-[#C4C5C54D] rounded-nw shadow-[#FFC233] shadow-md">
@@ -22,7 +22,7 @@
                 </div>
             </div>
 
-            <button @click="next" class="absolute -bottom-7 flex w-[300px] h-[80px] text-[26px] font-medium bg-[#FFC233] text-black hover:bg-[#B97530] hover:text-white drop-shadow-xl font-medium
+            <button @click="next" class="block my-10 lg:my-0 lg:absolute -bottom-7 flex w-[300px] h-[80px] text-[26px] font-medium bg-[#FFC233] text-black hover:bg-[#B97530] hover:text-white drop-shadow-xl font-medium
             rounded-[15px] items-center justify-center cursor-pointer">
                 พร้อมทำแบบทดสอบ
             </button>

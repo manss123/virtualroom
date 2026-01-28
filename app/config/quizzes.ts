@@ -207,7 +207,7 @@ export const QUIZZES: Record<string, QuizDef> = {
           { value: "c", image: "images/quizzes/4/1-c.png", alt: "ตัวเลือก ค" },
           { value: "d", text: "ง. ทุกข้ออัตราทดเฟืองมีค่าเท่ากับ 1 ทั้งหมด" },
         ],
-        answer: "c",
+        answer: "d",
       },
       {
         id: "q2",
