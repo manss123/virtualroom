@@ -40,7 +40,7 @@ function classifyFromFlags(D: number, E: number, F: number, G: number): string {
 // ====== flags per QUESTION j (use 1.1 / 1.2 / 1.3 / 1.4 pattern) ======
 function computeFlagsForQuestion(
   question: any,
-  qAnswers: Record<string, string>
+  qAnswers: Record<string, string>,
 ) {
   const baseId = String(question.id); // e.g. 1
   const id1 = `${baseId}.1`; // correctness
@@ -170,7 +170,7 @@ function buildLearningPath(
       high: number;
       label: "LOW" | "AVERAGE" | "HIGH";
     }
-  >
+  >,
 ): LearningPathItem[] {
   const path: LearningPathItem[] = [];
 
@@ -197,6 +197,16 @@ function buildLearningPath(
   return path;
 }
 
+function buildFullLearningPath(): LearningPathItem[] {
+  const all: LearningPathItem[] = ["C1", "C2", "C3", "C4"].map((conceptId) => ({
+    conceptId,
+    fuzzyLabel: "AVERAGE",
+    action: "REVIEW", // or "EXTRA" if you want
+  }));
+
+  return all;
+}
+
 export interface TestAnswers {
   [questionId: string]: {
     [sectionId: string]: string;
@@ -208,10 +218,11 @@ export interface EvaluateParams {
   answers: TestAnswers;
   startedAt?: number;
   finishedAt?: number;
+  enableFuzzy?: boolean;
 }
 
 export function evaluateTest(params: EvaluateParams) {
-  const { mode, answers, startedAt, finishedAt } = params;
+  const { mode, answers, startedAt, finishedAt, enableFuzzy = true } = params;
 
   let totalScored = 0;
   let totalCorrect = 0;
@@ -283,9 +294,29 @@ export function evaluateTest(params: EvaluateParams) {
   }
 
   const conceptScores = computeConceptScores(itemScoresByQuestionId);
-  const fuzzyProfile = computeFuzzyProfile(conceptScores);
 
-  const learningPath = buildLearningPath(fuzzyProfile);
+  if (enableFuzzy) {
+    const fuzzyProfile = computeFuzzyProfile(conceptScores);
+    const learningPath = buildLearningPath(fuzzyProfile);
+
+    return {
+      mode,
+      totalScored,
+      totalCorrect,
+      percent,
+      timeUsedSeconds,
+      answers,
+      details,
+      itemCodesByQuestionId,
+      itemScoresByQuestionId,
+      flagsByQuestionId,
+      conceptScores,
+      fuzzyProfile,
+      learningPath,
+    };
+  }
+
+  const learningPath = buildFullLearningPath();
 
   return {
     mode,
@@ -299,7 +330,8 @@ export function evaluateTest(params: EvaluateParams) {
     itemScoresByQuestionId,
     flagsByQuestionId,
     conceptScores,
-    fuzzyProfile,
+
+    fuzzyProfile: null,
     learningPath,
   };
 }

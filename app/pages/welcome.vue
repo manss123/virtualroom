@@ -50,7 +50,7 @@ const goToLearningHome = () => {
 
 const youtubeEmbedUrl = computed(() => {
   // video id = pZ9h7cjL30Q
-  return "https://www.youtube.com/embed/pZ9h7cjL30Q?rel=0&modestbranding=1"
+  return "https://www.youtube.com/embed/ubiXccwwF4c?rel=0&modestbranding=1"
 })
 
 </script>

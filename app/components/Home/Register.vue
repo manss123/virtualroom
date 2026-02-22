@@ -77,9 +77,9 @@
             <select v-model="form.grade" class="w-[350px] h-[80px] px-5 bg-[#EFF7F7] rounded-[15px] appearance-none"
               required>
               <option value="" disabled>เลือกระดับชั้น</option>
-              <optgroup label="ประถมศึกษา">
+              <!-- <optgroup label="ประถมศึกษา">
                 <option v-for="g in primaryGrades" :key="g" :value="g">{{ g }}</option>
-              </optgroup>
+              </optgroup> -->
               <optgroup label="มัธยมศึกษา">
                 <option v-for="g in secondaryGrades" :key="g" :value="g">{{ g }}</option>
               </optgroup>
@@ -104,8 +104,8 @@
           *ข้อมูลที่นักเรียนจำเป็นต้องกรอก
         </div>
         <div class="flex w-full text-white">
-          **รหัสที่นักเรียนกรอกนี้จะไม่สามารถแก้ไขได้ในภายหลัง <br> หากมีข้อผิดพลาดติดต่ออาจารย์ xxx มาที่อีเมล
-          xxx@gmail.com
+          **รหัสที่นักเรียนกรอกนี้จะไม่สามารถแก้ไขได้ในภายหลัง <br> หากมีข้อผิดพลาดติดต่ออาจารย์ ชินภัท มงคลศิริวัฒนา (ครูโอห์ม) มาที่อีเมล
+          chinapat.mon@dsil.ac.th
         </div>
 
         <div class="flex flex-col gap-4 items-center justify-center  w-full">
@@ -150,9 +150,9 @@ const submitting = ref(false);
 const error = ref("");
 const success = ref("");
 
-const ages = Array.from({ length: 10 }, (_, i) => i + 11);
-const primaryGrades = ["ป.4", "ป.5", "ป.6"];
-const secondaryGrades = ["ม.1", "ม.2", "ม.3", "ม.4", "ม.5", "ม.6"];
+const ages = Array.from({ length: 6 }, (_, i) => i + 14); 
+// const primaryGrades = ["ป.4", "ป.5", "ป.6"];
+const secondaryGrades = ["ม.4", "ม.5", "ม.6"];
 
 const onSubmit = async () => {
   error.value = "";

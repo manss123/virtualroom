@@ -244,6 +244,10 @@ import { ROOM_DETAILS } from "~/config/roomDetails";
 const router = useRouter();
 const { getImageURL } = useAssetUrl();
 
+const { data: me } = await useFetch("/api/auth/me");
+
+const isGroupB = computed(() => me.value?.experimentGroup === "B");
+
 // ---------- 1. Load fuzzy learningPath from pre-test ----------
 const { data } = await useFetch("/api/tests/pre", {
   method: "GET",
@@ -318,18 +322,19 @@ const errorMessage = ref<string | null>(null);
 
 // build rooms when data arrives
 watchEffect(() => {
-  if (!data.value) return;
+  if (!data.value || !me.value) return;
 
   const lp = data.value.learningPath as RawLearningPathItem[] | undefined;
-  if (!lp) {
+
+  if (!lp && !isGroupB.value) {
     errorMessage.value = "ยังไม่พบผล Pre-test กรุณาทำแบบทดสอบก่อนวางแผน";
-    router.push("/pre-test"); // or wherever your pre-test route is
+    router.push("/pre-test");
     return;
   }
 
   const newRooms: RoomPlan[] = [];
 
-  // Intro 1 (always first)
+  // Intro 1
   newRooms.push({
     key: "intro1",
     label: "ห้อง Intro 1",
@@ -337,23 +342,36 @@ watchEffect(() => {
     endDate: null,
   });
 
-  // dynamic concept rooms from learningPath
-  for (const item of lp) {
-    const label = CONCEPT_LABELS[item.conceptId];
-    if (!label) continue; // unknown concept, skip
-
-    // only add when student needs to learn/review (LOW/AVERAGE)
-    if (item.action === "EXTRA" || item.action === "REVIEW") {
+  // ---------- GROUP B → ALL CONCEPT ROOMS ----------
+  if (isGroupB.value) {
+    ["C1", "C2", "C3", "C4"].forEach((cid) => {
       newRooms.push({
-        key: item.conceptId,
-        label,
+        key: cid,
+        label: CONCEPT_LABELS[cid],
         startDate: null,
         endDate: null,
       });
+    });
+  }
+
+  // ---------- GROUP A → FUZZY ROOMS ----------
+  else {
+    for (const item of lp ?? []) {
+      const label = CONCEPT_LABELS[item.conceptId];
+      if (!label) continue;
+
+      if (item.action === "EXTRA" || item.action === "REVIEW") {
+        newRooms.push({
+          key: item.conceptId,
+          label,
+          startDate: null,
+          endDate: null,
+        });
+      }
     }
   }
 
-  // Intro 2 (always last)
+  // Intro 2
   newRooms.push({
     key: "intro2",
     label: "ห้อง Intro 2",

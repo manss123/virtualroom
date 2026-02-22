@@ -35,6 +35,13 @@ export default defineEventHandler(async (event) => {
   }
 
   const uid = decoded.uid || decoded.user_id;
+    // ---------- load student experiment group ----------
+  const studentRef = adminDb.collection("students").doc(uid);
+  const studentSnap = await studentRef.get();
+  const experimentGroup =
+    (studentSnap.exists && (studentSnap.data() as any)?.experimentGroup) || "A";
+
+  const isGroupB = experimentGroup === "B";
 
   // ---------- read body (NEW format) ----------
   const body = await readBody<{
@@ -56,6 +63,7 @@ export default defineEventHandler(async (event) => {
     answers: body.answers,
     startedAt: body.startedAt,
     finishedAt: body.finishedAt ?? Date.now(),
+    enableFuzzy: !isGroupB,
   });
 
   // result has:
@@ -86,6 +94,7 @@ export default defineEventHandler(async (event) => {
 
   await testRef.set({
     ...result,
+    experimentGroup,
     createdAt: FieldValue.serverTimestamp(),
   });
 
@@ -93,5 +102,6 @@ export default defineEventHandler(async (event) => {
     ok: true,
     result,
     learningPath: result.learningPath,
+    experimentGroup,
   };
 });

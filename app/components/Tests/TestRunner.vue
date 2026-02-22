@@ -348,9 +348,13 @@ const submitAll = async () => {
     const { data: me } = await useFetch("/api/auth/me");
     const group = me.value?.experimentGroup ?? "A";
 
-    await router.push(
-      props.mode === "pre" ? "/srm" : `/fuzzy-result?mode=post`
-    );
+    if(props.mode === "pre") {
+        await router.push("/srm");
+    } else {
+      await router.push(`/fuzzy-result?mode=post`).then(()=>{
+        window.location.reload();
+      });
+    }
   } catch (err) {
     console.error("❌ submit test failed:", err);
     alert("บันทึกผลแบบทดสอบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง");

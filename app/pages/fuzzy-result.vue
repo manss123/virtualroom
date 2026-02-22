@@ -193,6 +193,13 @@ type LearningPathItem = {
     action: LearningAction;
 };
 
+const ALL_CONCEPT_ROOMS: { key: string; label: string }[] = [
+  { key: "C1", label: "ห้อง Concept 1" },
+  { key: "C2", label: "ห้อง Concept 2" },
+  { key: "C3", label: "ห้อง Concept 3" },
+  { key: "C4", label: "ห้อง Concept 4" },
+];
+
 type TestResult = {
     percent?: number;
     learningPath?: LearningPathItem[];
@@ -264,22 +271,31 @@ const CONCEPT_LABELS: Record<string, { short: string; full: string }> = {
 };
 
 const learningPathRooms = computed(() => {
-    const rooms: { key: string; label: string }[] = [];
-    if(mode.value == 'pre') {
-        rooms.push({ key: "intro1", label: "ห้อง Intro 1" });
-    }
-    
-    const lp = (result.value?.learningPath ?? []) as LearningPathItem[];
-    for (const item of lp) {
-        const cfg = CONCEPT_LABELS[item.conceptId];
-        if (!cfg) continue;
-        rooms.push({ key: item.conceptId, label: cfg.short });
-    }
-    
-    if(mode.value == 'pre') {
-        rooms.push({ key: "intro2", label: "ห้อง Intro 2" });
-    }
+  // PRE only (this banner is used in pre mode)
+  if (mode.value !== "pre") return [];
+
+  // Always include intro rooms
+  const rooms: { key: string; label: string }[] = [
+    { key: "intro1", label: "ห้อง Intro 1" },
+  ];
+
+  // ✅ Group B: NO fuzzy/personalize -> force all concepts
+  if (isGroupB.value) {
+    rooms.push(...ALL_CONCEPT_ROOMS);
+    rooms.push({ key: "intro2", label: "ห้อง Intro 2" });
     return rooms;
+  }
+
+  // ✅ Group A: personalized (from fuzzy learningPath)
+  const lp = (result.value?.learningPath ?? []) as LearningPathItem[];
+  for (const item of lp) {
+    const cfg = CONCEPT_LABELS[item.conceptId];
+    if (!cfg) continue;
+    rooms.push({ key: item.conceptId, label: cfg.short });
+  }
+
+  rooms.push({ key: "intro2", label: "ห้อง Intro 2" });
+  return rooms;
 });
 
 const learningPathText = computed(() => learningPathRooms.value.map((r) => r.label).join(", "));
@@ -355,7 +371,7 @@ const bAdvice = computed(() => B_TEXT[bLevel.value].advice);
 const headerTitle = computed(() => (mode.value === "pre" ? "ผลการทำแบบทดสอบก่อนเรียน" : "ผลการทำแบบทดสอบหลังเรียน"));
 
 const mainTitle = computed(() => {
-    if (isGroupB.value) return "ผลลัพธ์หลังเรียนของนักเรียน";
+    if (isGroupB.value && mode.value === "post") return "ผลลัพธ์หลังเรียนของนักเรียน";
     return mode.value === "pre" ? "ห้องเรียนที่นักเรียนต้องเข้าเรียนเพื่อเสริมทักษะ" : "สรุปผลหลังเรียน + จุดที่ควรทบทวนเพิ่มเติม";
 });
 
