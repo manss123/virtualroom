@@ -9,6 +9,9 @@ type MeResponse = {
 };
 
 type ProgressState = {
+  preTestDone?: boolean;
+  questionnaireDone?: boolean;
+  planningDone?: boolean;
   postTestDone?: boolean;
 };
 
@@ -27,6 +30,9 @@ export function useAuthState() {
   });
 
   const postTestDone = computed(() => !!progress.value?.postTestDone);
+  const pretestDone = computed(() => !!progress.value?.preTestDone);
+  const srmDone = computed(() => !!progress.value?.questionnaireDone);
+  const planningDone = computed(() => !!progress.value?.planningDone);
 
   async function refreshAuth() {
     try {
@@ -48,5 +54,5 @@ export function useAuthState() {
     progress.value = null;
   }
 
-  return { me, progress, authStatus, displayName, postTestDone, refreshAuth, clearAuth };
+  return { me, progress, authStatus, displayName, postTestDone, pretestDone, srmDone, planningDone, refreshAuth, clearAuth };
 }

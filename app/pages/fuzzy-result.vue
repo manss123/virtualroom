@@ -312,8 +312,9 @@ const roomsNeedText = computed(() => {
     const lp = (result.value?.learningPath ?? []) as LearningPathItem[];
     const conceptRooms = lp.map((x) => CONCEPT_ROOM_LABEL[x.conceptId]).filter(Boolean);
 
-    const list = ["ห้อง Intro 1", ...conceptRooms, "ห้อง Intro 2"];
-    if (conceptRooms.length === 0) return "ห้อง Intro 1, ห้อง Intro 2";
+    // const list = ["ห้อง Intro 1", ...conceptRooms, "ห้อง Intro 2"];
+    const list = [...conceptRooms];
+    if (conceptRooms.length === 0) return "ไม่มีห้องเรียนเพิ่มเติมที่แนะนำ (เยี่ยมมาก!)";
     return list.join(", ");
 });
 

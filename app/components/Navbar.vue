@@ -17,31 +17,26 @@
           </template>
 
           <template v-else>
-            <NuxtLink
-              v-if="isTeacher"
-              to="/teacher/dashboard"
-              class="hover:underline"
-            >
+            <NuxtLink v-if="isTeacher" to="/teacher/dashboard" class="hover:underline">
               Student Report
             </NuxtLink>
 
-            <NuxtLink
-              v-if="!postTestDone"
-              to="/welcome"
+            <NuxtLink 
+              v-if="!postTestDone" 
+              :to="disabledLink ? '' : '/welcome'" 
               class="hover:underline"
-            >
+              :class="disabledLink ? 'opacity-50 cursor-not-allowed' : ''">
               Virtual 360° Room
             </NuxtLink>
 
-            <span
-              v-else
-              class="opacity-50 cursor-not-allowed select-none"
-              title="ทำ Post-test แล้ว"
-            >
+            <span v-else class="opacity-50 cursor-not-allowed select-none" title="ทำ Post-test แล้ว">
               Virtual 360° Room
             </span>
 
-            <NuxtLink to="/dashboard" class="hover:underline">
+            <NuxtLink 
+              :to="disabledLink ? '' : '/dashboard'" 
+              class="hover:underline"
+              :class="disabledLink ? 'opacity-50 cursor-not-allowed' : ''">
               My Dashboard
             </NuxtLink>
 
@@ -49,42 +44,32 @@
               {{ displayName }}
             </span>
 
-            <button
-              class="px-4 py-2 rounded-lg bg-[#342F35] text-white hover:opacity-90"
-              :disabled="logoutPending"
-              @click="logout"
-            >
+            <button class="px-4 py-2 rounded-lg bg-[#342F35] text-white hover:opacity-90" :disabled="logoutPending"
+              @click="logout">
               {{ logoutPending ? "..." : "Logout" }}
             </button>
           </template>
         </div>
 
         <!-- Mobile Hamburger Button -->
-        <button
-          class="lg:hidden text-[#342F35]"
-          @click="mobileOpen = !mobileOpen"
-        >
+        <button class="lg:hidden text-[#342F35]" @click="mobileOpen = !mobileOpen">
           <!-- icon -->
-          <svg v-if="!mobileOpen" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8"
-            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"/>
+          <svg v-if="!mobileOpen" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
 
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-8 w-8"
-            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"/>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
 
       <!-- Mobile Dropdown Menu -->
       <transition name="slide">
-        <div
-          v-if="mobileOpen"
-          class="lg:hidden flex flex-col bg-[#FFC233] border-t border-[#e5b91f] px-6 py-4 space-y-4 text-[#342F35] font-medium"
-        >
+        <div v-if="mobileOpen"
+          class="lg:hidden flex flex-col bg-[#FFC233] border-t border-[#e5b91f] px-6 py-4 space-y-4 text-[#342F35] font-medium">
           <template v-if="authStatus !== 'authed'">
             <NuxtLink @click="closeMobile" to="/">Sign in</NuxtLink>
           </template>
@@ -94,7 +79,8 @@
               Student Report
             </NuxtLink>
 
-            <NuxtLink v-if="!postTestDone" @click="closeMobile" to="/welcome">
+            <NuxtLink v-if="!postTestDone" :to="disabledLink ? '' : '/welcome'"
+              :class="disabledLink ? 'opacity-50 cursor-not-allowed' : ''" @click="closeMobile">
               Virtual 360° Room
             </NuxtLink>
 
@@ -102,7 +88,8 @@
               Virtual 360° Room
             </span>
 
-            <NuxtLink @click="closeMobile" to="/dashboard">
+            <NuxtLink :to="disabledLink ? '' : '/dashboard'"
+              :class="disabledLink ? 'opacity-50 cursor-not-allowed' : ''" @click="closeMobile">
               My Dashboard
             </NuxtLink>
 
@@ -110,10 +97,7 @@
               {{ displayName }}
             </div>
 
-            <button
-              class="w-full text-left px-3 py-2 rounded bg-[#342F35] text-white"
-              @click="logout"
-            >
+            <button class="w-full text-left px-3 py-2 rounded bg-[#342F35] text-white" @click="logout">
               Logout
             </button>
           </template>
@@ -126,8 +110,12 @@
 
 <script setup lang="ts">
 import { useAuthState } from '~/composables/useAuthState'
+import { computed, onMounted, ref } from 'vue'
 
-const { authStatus, displayName, postTestDone, refreshAuth, clearAuth, me } = useAuthState()
+const { authStatus, displayName, postTestDone, pretestDone, srmDone, planningDone, refreshAuth, clearAuth, me } = useAuthState()
+
+// Disable the Virtual 360° Room link if pre-test, srm, planning is not done yet
+const disabledLink = computed(() => !pretestDone.value || !srmDone.value || !planningDone.value)
 
 const logoutPending = ref(false)
 const mobileOpen = ref(false)
@@ -166,6 +154,7 @@ onMounted(() => {
 .slide-leave-active {
   transition: all 0.25s ease;
 }
+
 .slide-enter-from,
 .slide-leave-to {
   opacity: 0;

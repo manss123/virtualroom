@@ -236,6 +236,7 @@
 import { ref, computed, watchEffect } from "vue";
 import type { LearningRoomKey } from "~/config/learningRoom";
 import { ROOM_DETAILS } from "~/config/roomDetails";
+import { useAuthState } from "~/composables/useAuthState";
 
 // definePageMeta({
 //     middleware: ["auth"],
@@ -243,6 +244,7 @@ import { ROOM_DETAILS } from "~/config/roomDetails";
 
 const router = useRouter();
 const { getImageURL } = useAssetUrl();
+const { refreshAuth } = useAuthState();
 
 const { data: me } = await useFetch("/api/auth/me");
 
@@ -588,6 +590,7 @@ async function savePlan() {
 
     saveSuccess.value = true;
     router.push("/welcome");
+    refreshAuth();
   } catch (err: any) {
     console.error(err);
     errorMessage.value =
