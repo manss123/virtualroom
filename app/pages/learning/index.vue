@@ -86,12 +86,21 @@ import {
 } from "@/config/learningRoom";
 import type { ProgressState } from "~/types/progress";
 import LearningTopBarVue from "~/components/LearningTopBar.vue.vue";
+import { useAuthState } from "~/composables/useAuthState";
 
 definePageMeta({
   middleware: ["auth"],
 });
 
 const router = useRouter();
+
+const { postTestDone } = useAuthState()
+
+onMounted(() => {
+  if (postTestDone.value) {
+    router.push('/dashboard')
+  }
+})
 
 type LearningAction = "EXTRA" | "REVIEW" | "SKIP";
 
