@@ -265,22 +265,20 @@ function closeVideo() {
 
 function openDownload(url: string) {
   // Option A: open in new tab (simple)
-  // window.open(url, "_blank");
+  window.open(url, "_blank");
 
   // Option B (true “download”): create <a download>
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+  // const a = document.createElement("a");
+  // a.href = url;
+  // a.download = "";
+  // document.body.appendChild(a);
+  // a.click();
+  // a.remove();
 }
 
 async function handleDocHotspot(hotspot: HotspotDef) {
-  // intro rooms: always single doc
-  const isIntro = hotspot.roomKey === "intro1" || hotspot.roomKey === "intro2";
 
-  // LOW concept rooms: open 2 docs (or more)
+  const isIntro = hotspot.roomKey === "intro1" || hotspot.roomKey === "intro2";
   const isLow = currentConceptLevel.value === "LOW";
 
   const urls =
@@ -290,11 +288,9 @@ async function handleDocHotspot(hotspot: HotspotDef) {
 
   if (!urls.length) return;
 
-  // Open all docs (2 for LOW)
-  urls.forEach(openDownload);
-
-  // Mark doc step done once (still 1 hotspot)
   await markHotspotDone(hotspot.id);
+
+  urls.forEach(openDownload);
 }
 
 async function handleHotspotClick(payload: any) {
