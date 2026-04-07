@@ -319,7 +319,7 @@ const goToSummary = () => {
 };
 
 const backToPractice = () => {
-  if (!isInGrace.value) return;
+  if (isFinalTimeUp.value) return;
   step.value = "practice";
 };
 

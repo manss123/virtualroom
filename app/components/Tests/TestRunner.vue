@@ -78,7 +78,6 @@
 
 <script setup>
 import { questions as defaultQuestions } from "@/config/testConfig";
-import { prePostTestAnswerKey } from "@/config/testAnswerKey";
 
 import AssessmentHeader from "~/components/Tests/AssessmentHeader.vue";
 import AssessmentLayout from "~/components/Tests/AssessmentLayout.vue";
@@ -129,7 +128,6 @@ const {
   isFinalTimeUp,
   isInGrace,
   startedAtMs,
-  finalEndAtMs,
   clearStorage,
 } = useCountdown(MAIN_SECONDS, GRACE_SECONDS, {
   storageKey: `test_timer_${props.mode}_${uid}`,
@@ -231,11 +229,9 @@ const validateCurrentQuestion = () => {
 };
 
 const backToPractice = () => {
-  // allow only during grace
-  if (!isInGrace.value) return;
+  if (isFinalTimeUp.value) return;
 
   step.value = "practice";
-  // jump to last question or first missing (your choice)
   currentIndex.value = questionList.value.length - 1;
 };
 
@@ -327,7 +323,7 @@ const submitAll = async () => {
   console.log("Submitting test payload:", payload);
 
   try {
-    const res = await $fetch(`/api/tests/${props.mode}`, {
+    await $fetch(`/api/tests/${props.mode}`, {
       method: "POST",
       body: payload,
     });
@@ -345,8 +341,6 @@ const submitAll = async () => {
     alert("บันทึกผลแบบทดสอบเรียบร้อยแล้ว");
 
     const router = useRouter();
-    const { data: me } = await useFetch("/api/auth/me");
-    const group = me.value?.experimentGroup ?? "A";
 
     if(props.mode === "pre") {
         await router.push("/srm");

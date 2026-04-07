@@ -264,20 +264,16 @@ function closeVideo() {
 }
 
 function openDownload(url: string) {
-  // Option A: open in new tab (simple)
-  window.open(url, "_blank");
-
-  // Option B (true “download”): create <a download>
-  // const a = document.createElement("a");
-  // a.href = url;
-  // a.download = "";
-  // document.body.appendChild(a);
-  // a.click();
-  // a.remove();
+  const a = document.createElement('a');
+  a.href = url;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => a.remove(), 100);
 }
 
 async function handleDocHotspot(hotspot: HotspotDef) {
-
   const isIntro = hotspot.roomKey === "intro1" || hotspot.roomKey === "intro2";
   const isLow = currentConceptLevel.value === "LOW";
 
@@ -288,9 +284,10 @@ async function handleDocHotspot(hotspot: HotspotDef) {
 
   if (!urls.length) return;
 
-  await markHotspotDone(hotspot.id);
-
+  // Open downloads first (must stay synchronous with user gesture for Safari/iPad)
   urls.forEach(openDownload);
+
+  await markHotspotDone(hotspot.id);
 }
 
 async function handleHotspotClick(payload: any) {

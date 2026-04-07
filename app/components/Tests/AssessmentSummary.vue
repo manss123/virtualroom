@@ -82,6 +82,7 @@ const props = defineProps({
     confusedImage: { type: String, required: true },
 });
 
+const isTimeUp = computed(() => props.isFinalTimeUp);
 
 const emit = defineEmits(['back', 'goToFirstMissing', 'submit']);
 </script>
