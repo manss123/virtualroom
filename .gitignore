@@ -18,6 +18,11 @@ logs
 .fleet
 .idea
 
+# Environment variables (never commit real credentials)
+.env
+.env.local
+.env.*.local
+
 # Local env files
 .env
 .env.*
