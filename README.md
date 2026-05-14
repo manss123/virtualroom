@@ -1,75 +1,116 @@
-# Nuxt Minimal Starter
+# Virtual Room — Nuxt 4 App
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+## Development Setup
 
-## Setup
-
-Make sure to install dependencies:
+Install dependencies:
 
 ```bash
-# npm
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
+Copy the environment file and fill in your credentials:
+
+```bash
+cp .env.example .env
+```
 
 Start the development server on `http://localhost:3000`:
 
 ```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+---
 
-Build the application for production:
+## Build for Production
 
 ```bash
-# npm
 npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
 ```
 
-Locally preview production build:
+This generates a `.output` folder containing everything needed to run the app.
+
+---
+
+## Self-Hosted Deployment (Client Server)
+
+### Requirements
+
+- Node.js 18 or higher
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+node --version   # verify
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+### 1. Upload the `.output` folder to the server
+
+```
+/var/www/myapp/
+  └── .output/
+        ├── server/
+        ├── public/
+        └── nitro.json
+```
+
+### 2. Create a `.env` file next to `.output`
+
+Fill in every key from `.env.example` with real values:
+
+```
+/var/www/myapp/
+  ├── .output/
+  └── .env
+```
+
+### 3. Run the server
+
+```bash
+node .output/server/index.mjs
+```
+
+Default port is **3000**. To change it:
+
+```bash
+PORT=8080 node .output/server/index.mjs
+```
+
+---
+
+## Production Process Manager (Recommended)
+
+Use PM2 to keep the server running after terminal closes and auto-restart on reboot:
+
+```bash
+npm install -g pm2
+
+pm2 start .output/server/index.mjs --name "virtualroom"
+pm2 save
+pm2 startup
+```
+
+---
+
+## Nginx Reverse Proxy (Optional)
+
+If the server uses Nginx to serve on port 80/443:
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+    }
+}
+```
+
+Reload Nginx after saving:
+
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
