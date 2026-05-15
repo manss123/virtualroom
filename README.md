@@ -1,6 +1,12 @@
 # Virtual Room — Nuxt 4 App
 
-## Development Setup
+[English](#english) | [ภาษาไทย](#ภาษาไทย)
+
+---
+
+## English
+
+### Development Setup
 
 Install dependencies:
 
@@ -22,7 +28,7 @@ npm run dev
 
 ---
 
-## Environment Variables & Secrets
+### Environment Variables & Secrets
 
 Public Firebase config keys go in `apphosting.yaml` as `value:` entries.
 
@@ -36,7 +42,7 @@ For local development, copy `.env.example` to `.env` and fill in real values. Th
 
 ---
 
-## Build for Production
+### Build for Production
 
 ```bash
 npm run build
@@ -46,9 +52,9 @@ This generates a `.output` folder containing everything needed to run the app.
 
 ---
 
-## Self-Hosted Deployment (Client Server)
+### Self-Hosted Deployment (Client Server)
 
-### Requirements
+#### Requirements
 
 - Node.js 18 or higher
 
@@ -56,7 +62,7 @@ This generates a `.output` folder containing everything needed to run the app.
 node --version   # verify
 ```
 
-### 1. Upload the `.output` folder to the server
+#### 1. Upload the `.output` folder to the server
 
 ```
 /var/www/myapp/
@@ -66,7 +72,7 @@ node --version   # verify
         └── nitro.json
 ```
 
-### 2. Create a `.env` file next to `.output`
+#### 2. Create a `.env` file next to `.output`
 
 Fill in every key from `.env.example` with real values:
 
@@ -76,7 +82,7 @@ Fill in every key from `.env.example` with real values:
   └── .env
 ```
 
-### 3. Run the server
+#### 3. Run the server
 
 ```bash
 node .output/server/index.mjs
@@ -90,7 +96,7 @@ PORT=8080 node .output/server/index.mjs
 
 ---
 
-## Production Process Manager (Recommended)
+### Production Process Manager (Recommended)
 
 Use PM2 to keep the server running after terminal closes and auto-restart on reboot:
 
@@ -104,7 +110,7 @@ pm2 startup
 
 ---
 
-## Nginx Reverse Proxy (Optional)
+### Nginx Reverse Proxy (Optional)
 
 If the server uses Nginx to serve on port 80/443:
 
@@ -124,6 +130,139 @@ server {
 ```
 
 Reload Nginx after saving:
+
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+---
+
+## ภาษาไทย
+
+### การติดตั้งสำหรับนักพัฒนา
+
+ติดตั้ง dependencies:
+
+```bash
+npm install
+```
+
+คัดลอกไฟล์ environment และกรอกข้อมูล credentials:
+
+```bash
+cp .env.example .env
+```
+
+เริ่ม development server ที่ `http://localhost:3000`:
+
+```bash
+npm run dev
+```
+
+---
+
+### Environment Variables และ Secrets
+
+ค่า config ของ Firebase ที่เป็นสาธารณะ (public) ให้ใส่ใน `apphosting.yaml` แบบ `value:`
+
+ค่าที่เป็นความลับ เช่น Admin SDK และ Service Account **ต้องเก็บใน Google Cloud Secret Manager เท่านั้น** และอ้างอิงใน `apphosting.yaml` แบบ `secret:` — ห้ามเขียนตรงๆ ในไฟล์เด็ดขาด หากต้องการเพิ่มหรือเปลี่ยน secret ให้รัน:
+
+```bash
+firebase apphosting:secrets:set SECRET_NAME
+```
+
+สำหรับการพัฒนาบนเครื่องตัวเอง ให้คัดลอก `.env.example` เป็น `.env` และกรอกค่าจริง ไฟล์ `.env` ถูก gitignore ไว้แล้ว ห้าม commit ขึ้น git
+
+---
+
+### Build สำหรับ Production
+
+```bash
+npm run build
+```
+
+คำสั่งนี้จะสร้างโฟลเดอร์ `.output` ที่มีทุกอย่างที่จำเป็นสำหรับการรันเว็บไซต์
+
+---
+
+### การติดตั้งบน Server ของตัวเอง
+
+#### ความต้องการของระบบ
+
+- Node.js เวอร์ชัน 18 ขึ้นไป
+
+```bash
+node --version   # ตรวจสอบเวอร์ชัน
+```
+
+#### 1. อัปโหลดโฟลเดอร์ `.output` ขึ้น server
+
+```
+/var/www/myapp/
+  └── .output/
+        ├── server/
+        ├── public/
+        └── nitro.json
+```
+
+#### 2. สร้างไฟล์ `.env` ไว้ข้างๆ โฟลเดอร์ `.output`
+
+กรอกค่าทุก key จาก `.env.example` ด้วยค่าจริง:
+
+```
+/var/www/myapp/
+  ├── .output/
+  └── .env
+```
+
+#### 3. รัน server
+
+```bash
+node .output/server/index.mjs
+```
+
+ค่าเริ่มต้นจะรันที่ port **3000** หากต้องการเปลี่ยน port:
+
+```bash
+PORT=8080 node .output/server/index.mjs
+```
+
+---
+
+### Process Manager สำหรับ Production (แนะนำ)
+
+ใช้ PM2 เพื่อให้ server ทำงานต่อเนื่องแม้ปิด terminal และรีสตาร์ทอัตโนมัติเมื่อ reboot:
+
+```bash
+npm install -g pm2
+
+pm2 start .output/server/index.mjs --name "virtualroom"
+pm2 save
+pm2 startup
+```
+
+---
+
+### Nginx Reverse Proxy (ถ้าใช้)
+
+หาก server ใช้ Nginx รับ traffic ที่ port 80/443:
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+    }
+}
+```
+
+หลังจากบันทึกไฟล์ให้ reload Nginx:
 
 ```bash
 sudo nginx -t && sudo systemctl reload nginx
