@@ -22,6 +22,20 @@ npm run dev
 
 ---
 
+## Environment Variables & Secrets
+
+Public Firebase config keys go in `apphosting.yaml` as `value:` entries.
+
+Sensitive keys (Admin SDK, Service Account) must be stored in **Google Cloud Secret Manager** and referenced in `apphosting.yaml` as `secret:` — never hardcoded. To add or rotate a secret:
+
+```bash
+firebase apphosting:secrets:set SECRET_NAME
+```
+
+For local development, copy `.env.example` to `.env` and fill in real values. The `.env` file is gitignored and must never be committed.
+
+---
+
 ## Build for Production
 
 ```bash
